@@ -1,7 +1,7 @@
 package Entities;
 
 import Entities.States.FurnitureType;
-import com.sem3.Entities.States.OrderItemState;
+import Entities.States.OrderItemState;
 
 public class OrderItem {
     private int id;

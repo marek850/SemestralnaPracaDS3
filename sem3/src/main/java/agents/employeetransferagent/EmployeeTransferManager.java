@@ -27,6 +27,19 @@ public class EmployeeTransferManager extends OSPABA.Manager
 	//meta! sender="WorkshopAgent", id="78", type="Request"
 	public void processTransferEmployee(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message;
+		switch (msg.getOrderItem().getState()) {
+			case PENDING:
+				msg.setAddressee(myAgent().findAssistant(Id.wareHouseTransferProcess));
+				startContinualAssistant(msg);
+				break;
+			case MATERIAL_PREPARED:
+				msg.setAddressee(myAgent().findAssistant(Id.workStationTransferProcess));
+				startContinualAssistant(msg);
+				break;
+			default:
+				break;
+		}
 	}
 
 	//meta! sender="WorkStationTransferProcess", id="81", type="Finish"

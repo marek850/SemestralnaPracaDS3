@@ -60,6 +60,10 @@ public class AEmployeesManager extends OSPABA.Manager
 	//meta! sender="WorkshopAgent", id="147", type="Request"
 	public void processCutOrderItem(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message;
+		msg.setCode(Mc.transferAEmployee);
+		msg.setAddressee(myAgent().parent());
+		request(msg);
 	}
 
 	//meta! sender="AFitHardwareProcess", id="174", type="Finish"

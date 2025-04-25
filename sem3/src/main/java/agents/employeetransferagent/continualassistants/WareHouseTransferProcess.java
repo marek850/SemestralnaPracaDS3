@@ -4,10 +4,12 @@ import OSPABA.*;
 import simulation.*;
 import agents.employeetransferagent.*;
 import OSPABA.Process;
+import OSPRNG.TriangularRNG;
 
 //meta! id="82"
 public class WareHouseTransferProcess extends OSPABA.Process
 {
+	private TriangularRNG transferTimeGenerator = new TriangularRNG(60d, 120d, 480d);
 	public WareHouseTransferProcess(int id, Simulation mySim, CommonAgent myAgent)
 	{
 		super(id, mySim, myAgent);
@@ -23,6 +25,8 @@ public class WareHouseTransferProcess extends OSPABA.Process
 	//meta! sender="EmployeeTransferAgent", id="83", type="Start"
 	public void processStart(MessageForm message)
 	{
+		message.setCode(Mc.transferEmployee);
+		hold(transferTimeGenerator.sample(), message);
 	}
 
 	//meta! userInfo="Process messages defined in code", id="0"
@@ -30,6 +34,12 @@ public class WareHouseTransferProcess extends OSPABA.Process
 	{
 		switch (message.code())
 		{
+			case Mc.transferEmployee:
+				message.setAddressee(myAgent());
+				notice(message);
+				break;
+			default:
+				break;
 		}
 	}
 

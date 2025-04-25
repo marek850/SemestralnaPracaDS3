@@ -15,6 +15,10 @@ import simulation.*;
 public class WorkStationAgent extends OSPABA.Agent
 {
 	private Queue<MyMessage> waitingOrderItems;
+	public Queue<MyMessage> getWaitingOrderItems() {
+		return waitingOrderItems;
+	}
+
 	private List<AssemblyStation> assemblyStations;
 	public List<AssemblyStation> getAssemblyStations() {
 		return assemblyStations;

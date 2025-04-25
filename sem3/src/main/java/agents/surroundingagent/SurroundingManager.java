@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.sem3.Entities.States.OrderState;
+
 import Entities.Order;
 import Entities.OrderItem;
 import Entities.States.FurnitureType;
@@ -64,6 +66,7 @@ public class SurroundingManager extends OSPABA.Manager
 		{
 			case Mc.orderArrival:
 				Order newOrder = new Order(orderIDGen.nextInt());
+				newOrder.setState(OrderState.UNSTARTED);
 				newOrder.setOrderArrivalTime(mySim().currentTime());
 				for( int i = 0; i < itemNumberGen.getSample(); i++)
 				{

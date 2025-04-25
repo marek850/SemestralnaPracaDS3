@@ -41,6 +41,15 @@ public class WorkStationManager extends OSPABA.Manager
 	//meta! sender="WorkshopAgent", id="42", type="Notice"
 	public void processWorkStationRelease(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message;
+		
+		if (!myAgent().getWaitingOrderItems().isEmpty()) {
+			MyMessage waitingMsg = myAgent().getWaitingOrderItem();
+			waitingMsg.setAssemblyStation(msg.getAssemblyStation());
+			response(waitingMsg);
+		}else {
+			myAgent().releaseAssemblyStation(msg.getAssemblyStation());
+		}
 	}
 
 	//meta! userInfo="Process messages defined in code", id="0"
