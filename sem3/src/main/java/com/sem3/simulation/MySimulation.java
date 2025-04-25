@@ -1,0 +1,127 @@
+package com.sem3.simulation;
+
+import com.sem3.agents.aemployeesagent.AEmployeesAgent;
+import com.sem3.agents.bemployeesagent.BEmployeesAgent;
+import com.sem3.agents.cemployeesagent.CEmployeesAgent;
+import com.sem3.agents.employeetransferagent.EmployeeTransferAgent;
+import com.sem3.agents.modelagent.ModelAgent;
+import com.sem3.agents.surroundingagent.SurroundingAgent;
+import com.sem3.agents.workshopagent.WorkshopAgent;
+import com.sem3.agents.workstationagent.WorkStationAgent;
+
+import OSPABA.*;
+
+
+public class MySimulation extends OSPABA.Simulation
+{
+	public MySimulation()
+	{
+		init();
+	}
+
+	@Override
+	public void prepareSimulation()
+	{
+		super.prepareSimulation();
+		// Create global statistcis
+	}
+
+	@Override
+	public void prepareReplication()
+	{
+		super.prepareReplication();
+		// Reset entities, queues, local statistics, etc...
+	}
+
+	@Override
+	public void replicationFinished()
+	{
+		// Collect local statistics into global, update UI, etc...
+		super.replicationFinished();
+	}
+
+	@Override
+	public void simulationFinished()
+	{
+		// Display simulation results
+		super.simulationFinished();
+	}
+
+	//meta! userInfo="Generated code: do not modify", tag="begin"
+	private void init()
+	{
+		setModelAgent(new ModelAgent(Id.modelAgent, this, null));
+		setSurroundingAgent(new SurroundingAgent(Id.surroundingAgent, this, modelAgent()));
+		setWorkshopAgent(new WorkshopAgent(Id.workshopAgent, this, modelAgent()));
+		setAEmployeesAgent(new AEmployeesAgent(Id.aEmployeesAgent, this, workshopAgent()));
+		setBEmployeesAgent(new BEmployeesAgent(Id.bEmployeesAgent, this, workshopAgent()));
+		setCEmployeesAgent(new CEmployeesAgent(Id.cEmployeesAgent, this, workshopAgent()));
+		setWorkStationAgent(new WorkStationAgent(Id.workStationAgent, this, workshopAgent()));
+		setEmployeeTransferAgent(new EmployeeTransferAgent(Id.employeeTransferAgent, this, workshopAgent()));
+	}
+
+	private ModelAgent _modelAgent;
+
+public ModelAgent modelAgent()
+	{ return _modelAgent; }
+
+	public void setModelAgent(ModelAgent modelAgent)
+	{_modelAgent = modelAgent; }
+
+	private SurroundingAgent _surroundingAgent;
+
+public SurroundingAgent surroundingAgent()
+	{ return _surroundingAgent; }
+
+	public void setSurroundingAgent(SurroundingAgent surroundingAgent)
+	{_surroundingAgent = surroundingAgent; }
+
+	private WorkshopAgent _workshopAgent;
+
+public WorkshopAgent workshopAgent()
+	{ return _workshopAgent; }
+
+	public void setWorkshopAgent(WorkshopAgent workshopAgent)
+	{_workshopAgent = workshopAgent; }
+
+	private AEmployeesAgent _aEmployeesAgent;
+
+public AEmployeesAgent aEmployeesAgent()
+	{ return _aEmployeesAgent; }
+
+	public void setAEmployeesAgent(AEmployeesAgent aEmployeesAgent)
+	{_aEmployeesAgent = aEmployeesAgent; }
+
+	private BEmployeesAgent _bEmployeesAgent;
+
+public BEmployeesAgent bEmployeesAgent()
+	{ return _bEmployeesAgent; }
+
+	public void setBEmployeesAgent(BEmployeesAgent bEmployeesAgent)
+	{_bEmployeesAgent = bEmployeesAgent; }
+
+	private CEmployeesAgent _cEmployeesAgent;
+
+public CEmployeesAgent cEmployeesAgent()
+	{ return _cEmployeesAgent; }
+
+	public void setCEmployeesAgent(CEmployeesAgent cEmployeesAgent)
+	{_cEmployeesAgent = cEmployeesAgent; }
+
+	private WorkStationAgent _workStationAgent;
+
+public WorkStationAgent workStationAgent()
+	{ return _workStationAgent; }
+
+	public void setWorkStationAgent(WorkStationAgent workStationAgent)
+	{_workStationAgent = workStationAgent; }
+
+	private EmployeeTransferAgent _employeeTransferAgent;
+
+public EmployeeTransferAgent employeeTransferAgent()
+	{ return _employeeTransferAgent; }
+
+	public void setEmployeeTransferAgent(EmployeeTransferAgent employeeTransferAgent)
+	{_employeeTransferAgent = employeeTransferAgent; }
+	//meta! tag="end"
+}
