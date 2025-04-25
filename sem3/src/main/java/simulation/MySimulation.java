@@ -15,9 +15,25 @@ import agents.employeetransferagent.*;
 public class MySimulation extends OSPABA.Simulation
 {
 	private int aEmpNumber;
+	public int getaEmpNumber() {
+		return aEmpNumber;
+	}
+
 	private int bEmpNumber;
+	public int getbEmpNumber() {
+		return bEmpNumber;
+	}
+
 	private int cEmpNumber;
+	public int getcEmpNumber() {
+		return cEmpNumber;
+	}
+
 	private int workStationNumber;
+	public int getWorkStationNumber() {
+		return workStationNumber;
+	}
+
 	public MySimulation(int aEmpNumber, int bEmpNumber, int cEmpNumber, int workStationNumber)
 	{
 		
