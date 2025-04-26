@@ -162,6 +162,10 @@ public class WorkshopManager extends OSPABA.Manager
 	//meta! sender="AEmployeesAgent", id="147", type="Response"
 	public void processCutOrderItem(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message.createCopy();
+		msg.setCode(Mc.assembleOrderItem);
+		msg.setAddressee(Id.bEmployeesAgent);
+		request(msg);
 	}
 
 	//meta! sender="CEmployeesAgent", id="160", type="Request"

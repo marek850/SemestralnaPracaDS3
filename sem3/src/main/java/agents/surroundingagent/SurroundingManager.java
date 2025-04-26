@@ -16,10 +16,7 @@ import simulation.*;
 //meta! id="3"
 public class SurroundingManager extends OSPABA.Manager
 {
-	private DiscreteGenerator itemNumberGen = new DiscreteGenerator(new Random(), List.of(new int[]{1, 6}), List.of(1.0));
-	private DiscreteGenerator itemTypeGen = new DiscreteGenerator(new Random(), List.of(new int[]{0, 101}), List.of(1.0));
-	private Random orderIDGen = new Random();
-	private Random itemIDGen = new Random();
+	
 	
 
 	public SurroundingManager(int id, Simulation mySim, Agent myAgent)
@@ -65,12 +62,12 @@ public class SurroundingManager extends OSPABA.Manager
 		switch (myMessage.code())
 		{
 			case Mc.orderArrival:
-				Order newOrder = new Order(orderIDGen.nextInt());
+				Order newOrder = new Order(myAgent().getOrderIDGen().nextInt());
 				newOrder.setState(OrderState.UNSTARTED);
 				newOrder.setOrderArrivalTime(mySim().currentTime());
-				for( int i = 0; i < itemNumberGen.getSample(); i++)
+				for( int i = 0; i < myAgent().getItemNumberGen().sample(); i++)
 				{
-					int itemType = itemTypeGen.getSample();
+					int itemType = myAgent().getItemTypeGen().sample();
 					FurnitureType type = null;
 					if (itemType < 50) {
 						type = FurnitureType.TABLE;
@@ -80,7 +77,13 @@ public class SurroundingManager extends OSPABA.Manager
 					else {
 						type = FurnitureType.WARDROBE;
 					}
-					OrderItem item = new OrderItem(itemIDGen.nextInt(), newOrder.getOrderArrivalTime(), type);
+					OrderItem item = new OrderItem(myAgent().getItemIDGen().nextInt(), newOrder.getOrderArrivalTime(), type);
+					int stainProb = myAgent().getStainProbGen().sample();
+					if (stainProb < 15) {
+						item.setStain(true);
+					} else {
+						item.setStain(false);
+					}
 					newOrder.addItem(item);
 				}
 				myAgent().getActivOrders().add(newOrder);

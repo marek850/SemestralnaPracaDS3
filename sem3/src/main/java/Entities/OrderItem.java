@@ -10,7 +10,13 @@ public class OrderItem {
     private Order order;
     private OrderItemState state;
     private AssemblyStation assemblyStation;
-
+    private boolean stain;
+    public boolean isStain() {
+        return stain;
+    }
+    public void setStain(boolean stain) {
+        this.stain = stain;
+    }
     public AssemblyStation getAssemblyStation() {
         return assemblyStation;
     }
