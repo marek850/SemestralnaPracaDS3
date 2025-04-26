@@ -377,6 +377,7 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
             Integer timeFactor = Integer.parseInt(timeFactorString);
             simulation.setSimSpeed(1, 1*timeFactor);
         }
+        simulation.setSimSpeed(1, 0.0001);
         simulation.registerDelegate(this);
         
         simulation.setSimSpeed(1, 0.005);
@@ -430,7 +431,8 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
         } else {
             String timeFactorString = (String) timeFactorComboBox.getSelectedItem();
             Integer timeFactor = Integer.parseInt(timeFactorString);
-            simulation.setSimSpeed(1, 1*timeFactor);
+            //simulation.setSimSpeed(1, 1*timeFactor);
+            simulation.setSimSpeed(1, 0.0001);
             int SECONDS_IN_DAY = 28800;
             int SECONDS_IN_WEEK = 5 * SECONDS_IN_DAY;
     

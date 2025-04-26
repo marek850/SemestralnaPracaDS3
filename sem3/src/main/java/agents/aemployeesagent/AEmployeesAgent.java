@@ -4,9 +4,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-import com.sem3.Entities.States.EmployeeType;
-
 import Entities.Employee;
+import Entities.States.EmployeeType;
+import Entities.States.Position;
 import OSPABA.*;
 import simulation.*;
 import agents.aemployeesagent.continualassistants.*;
@@ -16,22 +16,35 @@ import agents.aemployeesagent.continualassistants.*;
 //meta! id="6"
 public class AEmployeesAgent extends OSPABA.Agent
 {
-	private Queue<MyMessage> waitingOrders;
-	public Queue<MyMessage> getWaitingOrders() {
-		return waitingOrders;
+	private Queue<MyMessage> waitingOrdersCutting;
+	private Queue<MyMessage> waitingOrdersHardwareFit;
+	public Queue<MyMessage> getWaitingOrdersHardwareFit() {
+		return waitingOrdersHardwareFit;
+	}
+	public Queue<MyMessage> getWaitingOrdersCutting() {
+		return waitingOrdersCutting;
 	}
 	private List<Employee> employees;
+	public List<Employee> getEmployees() {
+		return employees;
+	}
 	private List<Employee> freeEmployees;
+	public List<Employee> getFreeEmployees() {
+		return freeEmployees;
+	}
 	public AEmployeesAgent(int id, Simulation mySim, Agent parent)
 	{
 		super(id, mySim, parent);
 		MySimulation sim = (MySimulation) mySim;
 		employees = new LinkedList<Employee>();
 		freeEmployees = new LinkedList<Employee>();
-		waitingOrders = new LinkedList<MyMessage>();
+		waitingOrdersCutting = new LinkedList<MyMessage>();
+		waitingOrdersHardwareFit = new LinkedList<MyMessage>();
 		for (int i = 0; i < sim.getaEmpNumber(); i++) {
 			employees.add(new Employee(i, EmployeeType.A));
-			freeEmployees.add(employees.get(i));
+			Employee employee = employees.get(i);
+			employee.setPosition(Position.STORAGE);
+			freeEmployees.add(employee);
 		}
 		init();
 	}
@@ -42,14 +55,23 @@ public class AEmployeesAgent extends OSPABA.Agent
 		super.prepareReplication();
 		// Setup component for the next replication
 	}
-	public void addWaitingOrder(MyMessage message) {
-		waitingOrders.add(message);
+	public void addWaitingOrderFitting(MyMessage message) {
+		waitingOrdersHardwareFit.add(message);
 	}
-	public MyMessage getWaitingOrder() {
-		if (waitingOrders.isEmpty()) {
+	public MyMessage getWaitingOrderFitting() {
+		if (waitingOrdersHardwareFit.isEmpty()) {
 			return null;
 		}
-		return waitingOrders.remove();
+		return waitingOrdersHardwareFit.remove();
+	}
+	public void addWaitingOrderCutting(MyMessage message) {
+		waitingOrdersCutting.add(message);
+	}
+	public MyMessage getWaitingOrderCutting() {
+		if (waitingOrdersCutting.isEmpty()) {
+			return null;
+		}
+		return waitingOrdersCutting.remove();
 	}
 	public void releaseEmployee(Employee employee) {
 		freeEmployees.add(employee);
@@ -66,6 +88,7 @@ public class AEmployeesAgent extends OSPABA.Agent
 		new AEmployeesManager(Id.aEmployeesManager, mySim(), this);
 		new AFitHardwareProcess(Id.aFitHardwareProcess, mySim(), this);
 		new CutProcess(Id.cutProcess, mySim(), this);
+		new MaterialPrepareProcess(Id.materialPrepareProcess, mySim(), this);
 		addOwnMessage(Mc.requestAWaitingOrders);
 		addOwnMessage(Mc.aFitHardwareOnItem);
 		addOwnMessage(Mc.requestNumOfFreeEmpA);

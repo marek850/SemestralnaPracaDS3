@@ -29,4 +29,6 @@ public class Mc extends OSPABA.IdList
 	public static final int employeeTransfered = 1;
 	public static final int finishCutItem = 2;
 	// 1..1000 range reserved for user
+	public static final int preparingMaterial = 3;
+	public static final int cutting = 4;
 }

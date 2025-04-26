@@ -1,5 +1,6 @@
 package agents.workshopagent;
 
+import Entities.Employee;
 import Entities.Order;
 import Entities.OrderItem;
 import Entities.States.OrderItemState;
@@ -35,14 +36,33 @@ public class WorkshopManager extends OSPABA.Manager
 	//meta! sender="WorkStationAgent", id="40", type="Response"
 	public void processWorkStationAssignment(MessageForm message)
 	{
-		message.setCode(Mc.cutOrderItem);
-		message.setAddressee(Id.aEmployeesAgent);
-		request(message);
+		MyMessage msg = (MyMessage) message.createCopy();
+		msg.setCode(Mc.cutOrderItem);
+		msg.setAddressee(Id.aEmployeesAgent);
+		request(msg);
 	}
 
 	//meta! sender="EmployeeTransferAgent", id="78", type="Response"
 	public void processTransferEmployee(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message.createCopy();
+		Employee employee = msg.getEmployee();
+		switch (employee.getType()) {
+			case A:
+				msg.setCode(Mc.transferAEmployee);
+				response(msg);
+				break;
+			case B:
+				msg.setCode(Mc.transferBEmployee);
+				response(msg);
+				break;
+			case C:
+				msg.setCode(Mc.transferCEmployee);
+				response(msg);
+				break;
+			default:
+				break;
+		}
 	}
 
 
@@ -101,7 +121,7 @@ public class WorkshopManager extends OSPABA.Manager
 			newItemMessage.setOrderItem(item);
 			newItemMessage.setAddressee(Id.workStationAgent);
 			newItemMessage.setCode(Mc.workStationAssignment);
-			request(newMessage);
+			request(newItemMessage);
 		}
 	}
 
@@ -123,9 +143,10 @@ public class WorkshopManager extends OSPABA.Manager
 	//meta! sender="AEmployeesAgent", id="158", type="Request"
 	public void processTransferAEmployee(MessageForm message)
 	{
-		message.setCode(Mc.transferEmployee);
-		message.setAddressee(Id.employeeTransferAgent);
-		request(message);
+		MyMessage msg = (MyMessage) message.createCopy();
+		msg.setCode(Mc.transferEmployee);
+		msg.setAddressee(Id.employeeTransferAgent);
+		request(msg);
 	}
 
 	//meta! sender="CEmployeesAgent", id="156", type="Response"

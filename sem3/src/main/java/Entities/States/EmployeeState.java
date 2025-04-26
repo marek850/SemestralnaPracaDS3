@@ -6,7 +6,6 @@ public enum EmployeeState {
     PREBERA_OBJEDNAVKU("Preberá objednávku"),
     PREPARING_MATERIAL("Pripravuje materiál"), 
     CUTTING("Reže"), 
-    KOKOT("Kokot"),
     VARNISHING("Lakuje"), 
     ASSEMBLING("Skladá"), 
     FITTING("Montuje kovania");

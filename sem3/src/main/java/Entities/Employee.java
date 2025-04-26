@@ -1,8 +1,8 @@
 package Entities;
 
-import com.sem3.Entities.States.EmployeeState;
-import com.sem3.Entities.States.EmployeeType;
-import com.sem3.Entities.States.Position;
+import Entities.States.EmployeeState;
+import Entities.States.EmployeeType;
+import Entities.States.Position;
 import com.sem3.Statistics.Statistic;
 
 public class Employee {

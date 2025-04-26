@@ -1,5 +1,7 @@
 package agents.employeetransferagent.continualassistants;
 
+import Entities.States.OrderItemState;
+import Entities.States.Position;
 import OSPABA.*;
 import simulation.*;
 import agents.employeetransferagent.*;
@@ -25,8 +27,9 @@ public class WorkStationTransferProcess extends OSPABA.Process
 	//meta! sender="EmployeeTransferAgent", id="81", type="Start"
 	public void processStart(MessageForm message)
 	{
-		message.setCode(Mc.transferEmployee);
-		hold(transferTimeGenerator.sample(), message);
+		
+		
+		
 	}
 
 	//meta! userInfo="Process messages defined in code", id="0"
@@ -35,6 +38,7 @@ public class WorkStationTransferProcess extends OSPABA.Process
 		switch (message.code())
 		{
 			case Mc.transferEmployee:
+				message.setCode(Mc.finish);
 				message.setAddressee(myAgent());
 				notice(message);
 				break;

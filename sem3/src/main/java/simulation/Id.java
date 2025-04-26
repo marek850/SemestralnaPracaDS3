@@ -30,5 +30,6 @@ public class Id extends OSPABA.IdList
 	public static final int aFitHardwareProcess = 1026;
 	public static final int workStationTransferProcess = 1009;
 	public static final int wareHouseTransferProcess = 1010;
+	public static final int materialPrepareProcess = 1027;
 	//meta! tag="end"
 }

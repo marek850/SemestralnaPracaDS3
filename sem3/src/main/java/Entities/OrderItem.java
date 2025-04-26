@@ -9,7 +9,14 @@ public class OrderItem {
     private FurnitureType itemType;
     private Order order;
     private OrderItemState state;
+    private AssemblyStation assemblyStation;
 
+    public AssemblyStation getAssemblyStation() {
+        return assemblyStation;
+    }
+    public void setAssemblyStation(AssemblyStation assemblyStation) {
+        this.assemblyStation = assemblyStation;
+    }
     public OrderItem(int id, double orderArrivalTime, FurnitureType itemType) {
         this.id = id;
         this.orderArrivalTime = orderArrivalTime;

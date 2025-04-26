@@ -1,5 +1,8 @@
 package agents.employeetransferagent.continualassistants;
 
+import Entities.States.EmployeeState;
+import Entities.States.OrderItemState;
+import Entities.States.Position;
 import OSPABA.*;
 import simulation.*;
 import agents.employeetransferagent.*;
@@ -25,8 +28,26 @@ public class WareHouseTransferProcess extends OSPABA.Process
 	//meta! sender="EmployeeTransferAgent", id="83", type="Start"
 	public void processStart(MessageForm message)
 	{
-		message.setCode(Mc.transferEmployee);
-		hold(transferTimeGenerator.sample(), message);
+		MyMessage myMessage = (MyMessage) message;
+		myMessage.setCode(Mc.transferEmployee);
+		if (myMessage.getOrderItem().getState() == OrderItemState.PENDING) {
+			switch (myMessage.getEmployee().getCurrentPosition()) {
+				case STORAGE:
+					hold(0, myMessage);
+					break;
+				case ASSEMBLY_STATION:
+					myMessage.getEmployee().setState(EmployeeState.MOVING);
+					hold(transferTimeGenerator.sample(), myMessage);
+					break;
+				default:
+					break;
+			}
+		} else if (myMessage.getOrderItem().getState() == OrderItemState.MATERIAL_PREPARED) {
+			myMessage.getEmployee().setState(EmployeeState.MOVING);
+			hold(transferTimeGenerator.sample(), myMessage);
+		}{
+			
+		}
 	}
 
 	//meta! userInfo="Process messages defined in code", id="0"
@@ -35,8 +56,17 @@ public class WareHouseTransferProcess extends OSPABA.Process
 		switch (message.code())
 		{
 			case Mc.transferEmployee:
-				message.setAddressee(myAgent());
-				notice(message);
+				MyMessage myMessage = (MyMessage) message.createCopy();
+				if (myMessage.getOrderItem().getState()  == OrderItemState.PENDING) {
+					myMessage.getEmployee().setPosition(Position.STORAGE);
+					myMessage.getEmployee().setStation(null);
+				}else if (myMessage.getOrderItem().getState() == OrderItemState.MATERIAL_PREPARED) {
+					myMessage.getEmployee().setPosition(Position.ASSEMBLY_STATION);
+					myMessage.getEmployee().setStation(myMessage.getOrderItem().getAssemblyStation());
+				}
+				myMessage.setAddressee(myAgent());
+				myMessage.setCode(Mc.finish);
+				notice(myMessage);
 				break;
 			default:
 				break;

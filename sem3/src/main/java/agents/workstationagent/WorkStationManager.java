@@ -29,10 +29,11 @@ public class WorkStationManager extends OSPABA.Manager
 	//meta! sender="WorkshopAgent", id="40", type="Request"
 	public void processWorkStationAssignment(MessageForm message)
 	{
-		MyMessage msg = (MyMessage) message;
+		MyMessage msg = (MyMessage) message.createCopy();
 		if (myAgent().isFree()) {
 			msg.setAssemblyStation(myAgent().assignAssemblyStation());
-			response(message);
+			msg.getOrderItem().setAssemblyStation(msg.getAssemblyStation());
+			response(msg);
 		}else{
 			myAgent().addWaitingOrderItem(msg);
 		}
