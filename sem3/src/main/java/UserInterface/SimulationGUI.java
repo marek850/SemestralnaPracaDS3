@@ -38,6 +38,7 @@ import agents.aemployeesagent.AEmployeesAgent;
 import agents.bemployeesagent.BEmployeesAgent;
 import agents.cemployeesagent.CEmployeesAgent;
 import agents.surroundingagent.SurroundingAgent;
+import agents.workshopagent.WorkshopAgent;
 import agents.workstationagent.WorkStationAgent;
 import simulation.Id;
 import simulation.Mc;
@@ -53,6 +54,7 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
     private JTextField aEmployees;
     private JTextField bEmployees;
     private JTextField cEmployees;
+    private JTextField assemblyStations;
     private JTextField repsTextField;
     private JTextField pointsTextField;
     private JTextField currentReplicationTextField;
@@ -72,6 +74,7 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
     private JTextField waitingForVarnishLabelTextField;
     private JTextField waitingForAssembleLabelTextField;
     private JTextField waitingForFittingLabelTextField;
+    private JTextField waitingForFittingCLabelTextField;
     private JTable orderStatsJTable;
     private JTable groupStatsJTable;
     private JTable employeeStatsJTable;
@@ -127,6 +130,9 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
 
         JLabel cEmpLabel = new JLabel("Počet zamestnancov C:");
         cEmployees = new JTextField(10);
+
+        JLabel assemblyStationsLabel = new JLabel("Pocet montaznych miest:");
+        assemblyStations = new JTextField(10);
 
         // Pole pre zadanie počtu bodov na grafe
         JLabel pointsLabel = new JLabel("Počet bodov vykreslených na grafe:");
@@ -196,6 +202,10 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
         controlPanel.add(cEmpLabel, gbc);
         gbc.gridx = 5;
         controlPanel.add(cEmployees, gbc);
+        gbc.gridx = 6;
+        controlPanel.add(assemblyStationsLabel, gbc);
+        gbc.gridx = 7;
+        controlPanel.add(assemblyStations, gbc);
         
         gbc.gridx = 0;
         gbc.gridy = 2;
@@ -257,7 +267,7 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
         contentPanel.add(assemblyStationsScroll);
 
         
-        JPanel frontsPanel = new JPanel(new GridLayout(2, 4, 10, 10)); 
+        JPanel frontsPanel = new JPanel(new GridLayout(3, 6, 10, 10)); 
         animationPanel.add(frontsPanel, BorderLayout.NORTH);
 
        
@@ -300,7 +310,7 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
 
 
         // Objednávky čakajúce na lakovanie
-        JLabel waitingForVarnishLabel = new JLabel("Objednávky čakajúce na lakovanie:");
+        JLabel waitingForVarnishLabel = new JLabel("Objednávky čakajúce na morenie a lakovanie:");
         waitingForVarnishLabelTextField = new JTextField(10);
         waitingForVarnishLabelTextField.setEditable(false);
         frontsPanel.add(waitingForVarnishLabel);
@@ -315,11 +325,17 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
         frontsPanel.add(waitingForAssembleLabelTextField);
 
         // Objednávky čakajúce na montáž kovania
-        JLabel waitingForFittingLabel = new JLabel("Objednávky čakajúce na montáž kovani:");
+        JLabel waitingForFittingLabel = new JLabel("Objednávky čakajúce na montáž kovani A:");
         waitingForFittingLabelTextField = new JTextField(10);
         waitingForFittingLabelTextField.setEditable(false);
         frontsPanel.add(waitingForFittingLabel);
         frontsPanel.add(waitingForFittingLabelTextField);
+
+        JLabel waitingForFittingLabelC = new JLabel("Objednávky čakajúce na montáž kovani C:");
+        waitingForFittingCLabelTextField = new JTextField(10);
+        waitingForFittingCLabelTextField.setEditable(false);
+        frontsPanel.add(waitingForFittingLabelC);
+        frontsPanel.add(waitingForFittingCLabelTextField);
 
         String[] ordetStatsCol = {"Štatistika", "Hodnota", "Interval Spolahlivosti"};
         Object[][] orderStatsData = {};
@@ -355,10 +371,10 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
 
     private void pauseSimulation() {
         if (this.pauseButton.getText() == "Pozastaviť") {
-            
+            simulation.pauseSimulation();
             this.pauseButton.setText("Pokračovať");
         } else if (this.pauseButton.getText() == "Pokračovať") {
-            
+            simulation.resumeSimulation();
             this.pauseButton.setText("Pozastaviť");
         }
     }
@@ -371,23 +387,24 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
         int aEmployees = Integer.parseInt(this.aEmployees.getText());
         int bEmployees = Integer.parseInt(this.bEmployees.getText());
         int cEmployees = Integer.parseInt(this.cEmployees.getText());
+        int assemblyStations = Integer.parseInt(this.assemblyStations.getText());
         String timeFactorString = (String) timeFactorComboBox.getSelectedItem();
         
         startButton.setEnabled(false);
         stopButton.setEnabled(true);
         dataset.getSeries("Celkový čas spracovania objednávky").clear();
 
-        MySimulation simulation = new MySimulation(aEmployees, bEmployees, cEmployees, 1);
+        MySimulation simulation = new MySimulation(aEmployees, bEmployees, cEmployees, assemblyStations);
         if (timeFactorString.equals("MAX rýchlosť")) {
             simulation.setMaxSimSpeed();
         } else{
-            Integer timeFactor = Integer.parseInt(timeFactorString);
-            simulation.setSimSpeed(1, 1*timeFactor);
+            Double timeFactor = Double.parseDouble(timeFactorString);
+            simulation.setSimSpeed(1, 1/timeFactor);
         }
-        simulation.setSimSpeed(1, 0.0001);
+        //simulation.setSimSpeed(1, 0.0001);
         simulation.registerDelegate(this);
         
-        simulation.setSimSpeed(1, 0.005);
+        //simulation.setSimSpeed(1, 0.005);
             
         Thread thread = new Thread(() -> {
             simulation.simulate(1, 7171200);
@@ -413,6 +430,7 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
     }
     private void stopSimulation() {
         //simulation.setStop(true);
+        simulation.stopSimulation();
         startButton.setEnabled(true);
         stopButton.setEnabled(false);
     }
@@ -434,15 +452,62 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
     @Override
     public void refresh(Simulation arg0) {
         simulation = (MySimulation) arg0;
+        int replicationsToSkip = (int) (totalReplications * 0.3);
         if (totalReplications > 1) {
+            
+        
+            if (simulation.currentReplication() >= replicationsToSkip) {
+                if (totalReplications > points) {
+                    if (simulation.currentReplication() % (totalReplications/points) == 0) { 
+                        WorkshopAgent workshopAgent = (WorkshopAgent) simulation.findAgent(Id.workshopAgent);
+                        dataset.getSeries("Celkový čas spracovania objednávky").add(simulation.currentReplication(), workshopAgent.getOrderProcessGlobal().mean());
+                        
+                    }
+                }
+                else {
+                    WorkshopAgent workshopAgent = (WorkshopAgent) simulation.findAgent(Id.workshopAgent);
+                    dataset.getSeries("Celkový čas spracovania objednávky").add(simulation.currentReplication(), workshopAgent.getOrderProcessGlobal().mean());
+                }
+                
+            }
+            if (!simulation.isRunning()) {
+                WorkshopAgent workshopAgent = (WorkshopAgent) simulation.findAgent(Id.workshopAgent);
+                DefaultTableModel orderStatsModel = (DefaultTableModel) orderStatsJTable.getModel();
+                orderStatsModel.setRowCount(0); 
+                orderStatsModel.addRow(new Object[]{"Priemerný čas spracovania objednávky(h)", String.format("%.4f", workshopAgent.getOrderProcessGlobal().mean()/3600), "<" + String.format("%.4f", workshopAgent.getOrderProcessGlobal().confidenceInterval_95()[0]/3600) + ", " + String.format("%.4f", workshopAgent.getOrderProcessGlobal().confidenceInterval_95()[1]/3600) + ">"});
+                orderStatsModel.addRow(new Object[]{"Priemerny pocet cakajucich objednavok:", String.format("%.4f", workshopAgent.getGlobalWaitingOrders().mean()), "<" + String.format("%.4f", workshopAgent.getGlobalWaitingOrders().confidenceInterval_95()[0]) + ", " + String.format("%.4f", workshopAgent.getGlobalWaitingOrders().confidenceInterval_95()[1]) + ">"});
+                /* DefaultTableModel groupWorkStats = (DefaultTableModel) groupStatsJTable.getModel();
+                groupWorkStats.setRowCount(0); 
+                groupWorkStats.addRow(new Object[]{"A", String.format("%.4f", simulation.getWorkloadA().getAverage()), "<" + String.format("%.4f", simulation.getWorkloadA().getConfidenceInterval95()[0]) + ", " + String.format("%.4f", simulation.getWorkloadA().getConfidenceInterval95()[1]) + ">"});
+                groupWorkStats.addRow(new Object[]{"B", String.format("%.4f", simulation.getWorkloadB().getAverage()), "<" + String.format("%.4f", simulation.getWorkloadB().getConfidenceInterval95()[0]) + ", " + String.format("%.4f", simulation.getWorkloadB().getConfidenceInterval95()[1]) + ">"});
+                groupWorkStats.addRow(new Object[]{"C", String.format("%.4f", simulation.getWorkloadC().getAverage()), "<" + String.format("%.4f", simulation.getWorkloadC().getConfidenceInterval95()[0]) + ", " + String.format("%.4f", simulation.getWorkloadC().getConfidenceInterval95()[1]) + ">"});
+        
+                
+                DefaultTableModel employyStatsModel = (DefaultTableModel) employeeStatsJTable.getModel();
+                employyStatsModel.setRowCount(0); 
+                int index = 0;
+                for (Employee employee : simulation.getEmployeesA()) {
+                    employyStatsModel.addRow(new Object[]{index, "A", String.format("%.4f", employee.getWorkloadStat().getAverage()), "<" + String.format("%.4f", employee.getWorkloadStat().getConfidenceInterval95()[0]) + ", " + String.format("%.4f", employee.getWorkloadStat().getConfidenceInterval95()[1]) + ">"});
+                    index++;
+                }
+                for (Employee employee : simulation.getEmployeesB()) {
+                    employyStatsModel.addRow(new Object[]{index, "B", String.format("%.4f", employee.getWorkloadStat().getAverage()), "<" + String.format("%.4f", employee.getWorkloadStat().getConfidenceInterval95()[0]) + ", " + String.format("%.4f", employee.getWorkloadStat().getConfidenceInterval95()[1]) + ">"}); 
+                    index++;
+                }
+                for (Employee employee : simulation.getEmployeesC()) {
+                    employyStatsModel.addRow(new Object[]{index, "C", String.format("%.4f", employee.getWorkloadStat().getAverage()), "<" + String.format("%.4f", employee.getWorkloadStat().getConfidenceInterval95()[0]) + ", " + String.format("%.4f", employee.getWorkloadStat().getConfidenceInterval95()[1]) + ">"});
+                    index++;
+                } */
+            }
         } else {
             String timeFactorString = (String) timeFactorComboBox.getSelectedItem();
-            Integer timeFactor = Integer.parseInt(timeFactorString);
             //simulation.setSimSpeed(1, 1*timeFactor);
-            simulation.setSimSpeed(1, 0.0001);
             int SECONDS_IN_DAY = 28800;
             int SECONDS_IN_WEEK = 5 * SECONDS_IN_DAY;
-    
+            
+            Double timeFactor = Double.parseDouble(timeFactorString);
+            simulation.setSimSpeed(1, 1/timeFactor);
+            
             
             int week = (int) (simulation.currentTime() / SECONDS_IN_WEEK);
     
@@ -464,8 +529,8 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
             ArrayList<Employee> allEmployees = new ArrayList<>();
             AEmployeesAgent aEmployeesAgent = (AEmployeesAgent) simulation.findAgent(Id.aEmployeesAgent);
             allEmployees.addAll(aEmployeesAgent.getEmployees());
-            /* BEmployeesAgent bEmployeesAgent = (BEmployeesAgent) simulation.findAgent(Id.bEmployeesAgent);
-            allEmployees.addAll(bEmployeesAgent.getEmployees()); */
+            BEmployeesAgent bEmployeesAgent = (BEmployeesAgent) simulation.findAgent(Id.bEmployeesAgent);
+            allEmployees.addAll(bEmployeesAgent.getEmployees());
             CEmployeesAgent cEmployeesAgent = (CEmployeesAgent) simulation.findAgent(Id.cEmployeesAgent);
             allEmployees.addAll(cEmployeesAgent.getEmployees());
            
@@ -481,7 +546,7 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
             SurroundingAgent surroundingAgent = (SurroundingAgent) simulation.findAgent(Id.surroundingAgent);
             for (Order order : surroundingAgent.getActivOrders()) {
                 for (OrderItem orderItem : order.getItems()) {
-                    orderTableModel.addRow(new Object[]{orderItem.getOrder().getId(), orderItem.getItemType(), orderItem.getState(), "" });
+                    orderTableModel.addRow(new Object[]{orderItem.getOrder().getId(), orderItem.getItemType(), orderItem.getState(), orderItem.getAssemblyStation() != null ? orderItem.getAssemblyStation().getId() : ""});
                 }
             }
 
@@ -492,6 +557,24 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
             for (AssemblyStation station : workStationAgent.getAssemblyStations()) {
                 assemblyTableModel.addRow(new Object[]{station.getId(), station.getCurrentProcess()});
             }
+            // Aktualizácia frontov
+            waitingOrderLabelTextField.setText(String.valueOf(aEmployeesAgent.getWaitingOrdersCutting().size()));
+            freeALabelLabelTextField.setText(String.valueOf(aEmployeesAgent.getFreeEmployees().size()));
+            freeBLabelLabelTextField.setText(String.valueOf(bEmployeesAgent.getFreeEmployees().size()));
+            freeCLabelLabelTextField.setText(String.valueOf(cEmployeesAgent.getFreeEmployees().size()));
+            freeStationsLabelTextField.setText(String.valueOf(workStationAgent.getFreeAssemblyStations().size()));
+            waitingForVarnishLabelTextField.setText(String.valueOf(cEmployeesAgent.getWaitingOrdersVarnish().size()));
+            waitingForAssembleLabelTextField.setText(String.valueOf(bEmployeesAgent.getWaitingOrdersAssemble().size()));
+            waitingForFittingLabelTextField.setText(String.valueOf(aEmployeesAgent.getWaitingOrdersHardwareFit().size()));
+            waitingForFittingCLabelTextField.setText(String.valueOf(cEmployeesAgent.getWaitingOrdersHardwareFit().size()));
+
+            WorkshopAgent work = (WorkshopAgent) simulation.findAgent(Id.workshopAgent);
+            DefaultTableModel orderStatsModel = (DefaultTableModel) orderStatsJTable.getModel();
+            orderStatsModel.setRowCount(0); 
+            orderStatsModel.addRow(new Object[]{"Priemerný čas spracovania objednávky(h)", String.format("%.4f", work.getOrderProcessingTimeStat().mean()), "N/A" });
+            orderStatsModel.addRow(new Object[]{"Priemerny pocet cakajucich objednavok:", String.format("%.4f", work.getWaitingOrders().mean()), "N/A" });
+            DefaultTableModel groupWorkStats = (DefaultTableModel) groupStatsJTable.getModel();
+            groupWorkStats.setRowCount(0); 
         }
     }       
     

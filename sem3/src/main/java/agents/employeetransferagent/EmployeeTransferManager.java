@@ -36,15 +36,15 @@ public class EmployeeTransferManager extends OSPABA.Manager
 		if (state == OrderItemState.PENDING || state == OrderItemState.MATERIAL_PREPARED) {
 			msg.setAddressee(myAgent().findAssistant(Id.wareHouseTransferProcess));
 			startContinualAssistant(msg);
-		} else if(state == OrderItemState.CUT || state == OrderItemState.WAITING_FOR_VARNISH){
+		} else/*  (state == OrderItemState.CUT || state == OrderItemState.WAITING_FOR_VARNISH){
 		    if(msg.getEmployee().getCurrentPosition() == Position.STORAGE){
 				msg.setAddressee(myAgent().findAssistant(Id.wareHouseTransferProcess));
 				startContinualAssistant(msg);
 			}else{
 				msg.setAddressee(myAgent().findAssistant(Id.workStationTransferProcess));
 				startContinualAssistant(msg);
-			}
-		}else if(state == OrderItemState.VARNISHED || state == OrderItemState.WAITING_FOR_ASSEMBLY || state == OrderItemState.STAINED){
+			} */
+		/* }else if(state == OrderItemState.VARNISHED || state == OrderItemState.WAITING_FOR_ASSEMBLY || state == OrderItemState.STAINED) */{
 		    if(msg.getEmployee().getCurrentPosition() == Position.STORAGE){
 				msg.setAddressee(myAgent().findAssistant(Id.wareHouseTransferProcess));
 				startContinualAssistant(msg);

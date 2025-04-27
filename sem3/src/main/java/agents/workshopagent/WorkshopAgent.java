@@ -1,7 +1,9 @@
 package agents.workshopagent;
 
 import OSPABA.*;
+import OSPRNG.UniformContinuousRNG;
 import OSPStat.Stat;
+import OSPStat.WStat;
 import simulation.*;
 
 
@@ -10,9 +12,35 @@ import simulation.*;
 public class WorkshopAgent extends OSPABA.Agent
 {
 	private Stat orderProcessingTimeStat;
+	private Stat orderProcessGlobal;
+	private WStat waitingOrders;
+	private WStat globalWaitingOrders;
+	public WStat getWaitingOrders() {
+		return waitingOrders;
+	}
+	public WStat getGlobalWaitingOrders() {
+		return globalWaitingOrders;
+	}
+	public Stat getOrderProcessGlobal() {
+		return orderProcessGlobal;
+	}
+
+	public Stat getOrderProcessingTimeStat() {
+		return orderProcessingTimeStat;
+	}
+	private UniformContinuousRNG fitHardwareTime = new UniformContinuousRNG(900d, 1500d);
+
+	public UniformContinuousRNG getFitHardwareTime() {
+		return fitHardwareTime;
+	}
+
 	public WorkshopAgent(int id, Simulation mySim, Agent parent)
 	{
 		super(id, mySim, parent);
+		orderProcessingTimeStat = new Stat();
+		orderProcessGlobal = new Stat();
+		waitingOrders = new WStat(mySim);
+		globalWaitingOrders = new WStat(mySim);
 		init();
 	}
 

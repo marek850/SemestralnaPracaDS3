@@ -2,10 +2,10 @@ package agents.bemployeesagent.continualassistants;
 
 import Entities.States.EmployeeState;
 import Entities.States.OrderItemState;
+import Entities.States.Process;
 import OSPABA.*;
 import agents.bemployeesagent.*;
 import simulation.*;
-import OSPABA.Process;
 import OSPRNG.UniformContinuousRNG;
 
 //meta! id="164"
@@ -13,7 +13,7 @@ public class AssembleProcess extends OSPABA.Process
 {
 	private  UniformContinuousRNG tableAssembleTime = new UniformContinuousRNG(1800d, 3600d);
 	private  UniformContinuousRNG chairAssembleTime = new UniformContinuousRNG(840d, 1440d);
-	private  UniformContinuousRNG wardronbeAssembleTime = new UniformContinuousRNG(900d, 1500d);
+	private  UniformContinuousRNG wardronbeAssembleTime = new UniformContinuousRNG(2100d, 4500d);
 	public AssembleProcess(int id, Simulation mySim, CommonAgent myAgent)
 	{
 		super(id, mySim, myAgent);
@@ -31,6 +31,7 @@ public class AssembleProcess extends OSPABA.Process
 	{
 		MyMessage myMessage = (MyMessage) message;
 		myMessage.getEmployee().setState(EmployeeState.ASSEMBLING);
+		myMessage.getAssemblyStation().setCurrentProcess(Process.ASSEMBLING);
 		myMessage.getOrderItem().setState(OrderItemState.BEING_ASSEMBLED);
 		myMessage.setCode(Mc.assembleOrderItem);
 		switch (myMessage.getOrderItem().getItemType()) {

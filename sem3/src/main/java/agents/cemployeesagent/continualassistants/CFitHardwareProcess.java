@@ -1,13 +1,17 @@
 package agents.cemployeesagent.continualassistants;
 
+import Entities.States.EmployeeState;
+import Entities.States.OrderItemState;
 import OSPABA.*;
 import simulation.*;
 import agents.cemployeesagent.*;
-import OSPABA.Process;
+import Entities.States.Process;
+import OSPRNG.UniformContinuousRNG;
 
 //meta! id="171"
 public class CFitHardwareProcess extends OSPABA.Process
 {
+	
 	public CFitHardwareProcess(int id, Simulation mySim, CommonAgent myAgent)
 	{
 		super(id, mySim, myAgent);
@@ -23,6 +27,11 @@ public class CFitHardwareProcess extends OSPABA.Process
 	//meta! sender="CEmployeesAgent", id="172", type="Start"
 	public void processStart(MessageForm message)
 	{
+		MyMessage myMessage = (MyMessage) message;
+		myMessage.getEmployee().setState(EmployeeState.FITTING);
+		myMessage.getOrderItem().setState(OrderItemState.BEING_FITTED);
+		myMessage.setCode(Mc.cFitHardwareOnItem);
+		hold(myMessage.getHardwareFitTIme(), myMessage);
 	}
 
 	//meta! userInfo="Process messages defined in code", id="0"
@@ -30,6 +39,17 @@ public class CFitHardwareProcess extends OSPABA.Process
 	{
 		switch (message.code())
 		{
+			case Mc.cFitHardwareOnItem:
+				MyMessage myMessage = (MyMessage) message;
+				myMessage.getOrderItem().setState(OrderItemState.FITTED);
+				myMessage.getAssemblyStation().setCurrentProcess(Process.FITTING);
+				myMessage.getEmployee().setState(EmployeeState.IDLE);
+				myMessage.setCode(Mc.finish);
+				myMessage.setAddressee(myAgent());
+				notice(myMessage);
+				break;
+			default:
+				break;
 		}
 	}
 

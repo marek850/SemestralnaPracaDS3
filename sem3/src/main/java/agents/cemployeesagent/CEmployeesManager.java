@@ -2,6 +2,7 @@ package agents.cemployeesagent;
 
 import Entities.Employee;
 import Entities.States.EmployeeState;
+import Entities.States.FurnitureType;
 import Entities.States.OrderItemState;
 import Entities.States.Position;
 import OSPABA.*;
@@ -44,6 +45,10 @@ public class CEmployeesManager extends OSPABA.Manager
 			msg.setCode(Mc.varnishOrderitem);
 			msg.setAddressee(myAgent().findAssistant(Id.varnishProcess));
 			startContinualAssistant(msg);
+		} else {
+			msg.setCode(Mc.cFitHardwareOnItem);
+			msg.setAddressee(myAgent().findAssistant(Id.cFitHardwareProcess));
+			startContinualAssistant(msg);
 		}
 	}
 
@@ -80,6 +85,27 @@ public class CEmployeesManager extends OSPABA.Manager
 	//meta! sender="WorkshopAgent", id="156", type="Request"
 	public void processCFitHardwareOnItem(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message.createCopy();
+		//ak nie je volny zamestnanec tak dam spravu do cakania
+		if (myAgent().getFreeEmployees().isEmpty()) {
+			msg.getOrderItem().setState(OrderItemState.WAITING_FOR_FITTING);
+			myAgent().addWaitingOrderFitting(msg);
+		} else{
+			//ak je volny zamestnanec tak skontrolujem ci ho treba presunut
+			msg.setEmployee(myAgent().assignEmployee());
+			if(msg.getEmployee().getCurrentPosition() == Position.ASSEMBLY_STATION && msg.getEmployee().getStation() == msg.getAssemblyStation()) {
+				//ak je uz na montaznom mieste tak zacne s montazou
+				msg.setCode(Mc.cFitHardwareOnItem);
+				msg.setAddressee(myAgent().findAssistant(Id.cFitHardwareProcess));
+				startContinualAssistant(msg);
+			}else {
+				//ak noie je v sklade tak ho tam presuniem
+				msg.setCode(Mc.transferCEmployee);
+				msg.setAddressee(myAgent().parent());
+				request(msg);
+			}
+			
+		}
 	}
 
 	//meta! sender="VarnishProcess", id="170", type="Finish"
@@ -92,6 +118,9 @@ public class CEmployeesManager extends OSPABA.Manager
 		} else{
 			Employee finishedEmployee = msg.getEmployee();
 			handleFinishedEmployee(finishedEmployee);
+			if(msg.getOrderItem().getItemType() == FurnitureType.WARDROBE) {
+				System.out.println("");
+			}
 			msg.setEmployee(null);
 			msg.setCode(Mc.varnishOrderitem);
 			response(msg);
@@ -104,6 +133,9 @@ public class CEmployeesManager extends OSPABA.Manager
 		MyMessage msg = (MyMessage) message.createCopy();
 		Employee finishedEmployee = msg.getEmployee();
 		handleFinishedEmployee(finishedEmployee);
+		if(msg.getOrderItem().getItemType() == FurnitureType.WARDROBE) {
+			System.out.println("");
+		}
 		msg.setEmployee(null);
 		msg.setCode(Mc.varnishOrderitem);
 		response(msg);
@@ -118,7 +150,7 @@ public class CEmployeesManager extends OSPABA.Manager
 			waitingOrder.setAddressee(myAgent().parent());
 			request(waitingOrder);
 		} else if(!myAgent().getWaitingOrdersVarnish().isEmpty()) {
-			//ak caka objednavka na rezanie tak presunieme agenta do skladu
+			//ak caka objednavka na morenie tak presunieme agenta do skladu
 			MyMessage waitingOrder = myAgent().getWaitingOrderVarnish();
 			waitingOrder.setEmployee(finishedEmployee);
 			waitingOrder.setCode(Mc.transferCEmployee);
@@ -135,6 +167,13 @@ public class CEmployeesManager extends OSPABA.Manager
 	//meta! sender="CFitHardwareProcess", id="172", type="Finish"
 	public void processFinishCFitHardwareProcess(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message.createCopy();
+		Employee finishedEmployee = msg.getEmployee();
+		handleFinishedEmployee(finishedEmployee);
+		msg.setEmployee(null);
+		msg.setCode(Mc.cFitHardwareOnItem);
+		response(msg);
+
 	}
 
 	//meta! sender="WorkshopAgent", id="154", type="Request"

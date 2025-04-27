@@ -47,6 +47,7 @@ public class WorkStationManager extends OSPABA.Manager
 		if (!myAgent().getWaitingOrderItems().isEmpty()) {
 			MyMessage waitingMsg = myAgent().getWaitingOrderItem();
 			waitingMsg.setAssemblyStation(msg.getAssemblyStation());
+			waitingMsg.getOrderItem().setAssemblyStation(waitingMsg.getAssemblyStation());
 			response(waitingMsg);
 		}else {
 			myAgent().releaseAssemblyStation(msg.getAssemblyStation());

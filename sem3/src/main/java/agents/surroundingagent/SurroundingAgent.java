@@ -46,8 +46,8 @@ public class SurroundingAgent extends OSPABA.Agent
 		return activOrders;
 	}
 
-	public void setActivOrders(List<Order> activOrders) {
-		this.activOrders = activOrders;
+	public void removeOrder(Order order) {
+		activOrders.remove(order);
 	}
 	public SurroundingAgent(int id, Simulation mySim, Agent parent)
 	{

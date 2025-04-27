@@ -30,9 +30,10 @@ public class ModelManager extends OSPABA.Manager
 	//meta! sender="SurroundingAgent", id="32", type="Notice"
 	public void processOrderArrival(MessageForm message)
 	{
-		message.setCode(Mc.processOrder);
-		message.setAddressee(Id.workshopAgent);
-		request(message);
+		MyMessage msg = (MyMessage) message.createCopy();
+		msg.setCode(Mc.processOrder);
+		msg.setAddressee(Id.workshopAgent);
+		request(msg);
 	}
 
 	//meta! userInfo="Process messages defined in code", id="0"
@@ -51,6 +52,10 @@ public class ModelManager extends OSPABA.Manager
 	//meta! sender="WorkshopAgent", id="123", type="Response"
 	public void processProcessOrder(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message.createCopy();
+		msg.setCode(Mc.orderCompletion);
+		msg.setAddressee(Id.surroundingAgent);
+		notice(msg);
 	}
 
 	//meta! userInfo="Generated code: do not modify", tag="begin"

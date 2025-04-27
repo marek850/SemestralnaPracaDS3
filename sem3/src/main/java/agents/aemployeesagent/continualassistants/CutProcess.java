@@ -5,7 +5,7 @@ import Entities.States.OrderItemState;
 import OSPABA.*;
 import simulation.*;
 import agents.aemployeesagent.*;
-import OSPABA.Process;
+import Entities.States.Process;
 import OSPRNG.EmpiricPair;
 import OSPRNG.EmpiricRNG;
 import OSPRNG.RNG;
@@ -37,6 +37,7 @@ public class CutProcess extends OSPABA.Process
 	{
 		MyMessage myMessage = (MyMessage) message;
 		myMessage.getEmployee().setState(EmployeeState.CUTTING);
+		myMessage.getAssemblyStation().setCurrentProcess(Process.CUTTING);
 		myMessage.getOrderItem().setState(OrderItemState.BEING_CUT);
 		myMessage.setCode(Mc.cutOrderItem);
 		switch (myMessage.getOrderItem().getItemType()) {

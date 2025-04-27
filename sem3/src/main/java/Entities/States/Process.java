@@ -3,7 +3,8 @@ package Entities.States;
 public enum Process {
     NONE("Žiadny"),
     CUTTING("Rezanie"),
-    VARNISHING("Lakovanie"),
+    VARNISHING("Morenie"),
+    STAINING("Lakovanie"),
     ASSEMBLING("Skladanie"),
     FITTING("Montáž kovania");
 

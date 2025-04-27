@@ -41,6 +41,8 @@ public class SurroundingManager extends OSPABA.Manager
 	//meta! sender="ModelAgent", id="33", type="Notice"
 	public void processOrderCompletion(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message.createCopy();
+		myAgent().removeOrder(msg.getOrder());
 	}
 
 	//meta! sender="ModelAgent", id="29", type="Notice"

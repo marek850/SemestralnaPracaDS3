@@ -4,10 +4,10 @@ import simulation.MySimulation;
 public class Main {
     public static void main(String[] args) {
         int replikacie = 1;
-        int casReplikacie = 10000000;
+        int casReplikacie = 7171200;
 
-        MySimulation simulation = new MySimulation();
-        simulation.setSimSpeed(1, 0.00001);
+        MySimulation simulation = new MySimulation(5, 5, 50, 80);
+        simulation.setMaxSimSpeed();
         simulation.simulate(replikacie, casReplikacie);
     }
 }

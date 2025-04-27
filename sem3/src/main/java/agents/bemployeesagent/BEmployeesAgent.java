@@ -27,7 +27,7 @@ public class BEmployeesAgent extends OSPABA.Agent
 		freeEmployees = new LinkedList<Employee>();
 		waitingOrdersAssemble = new LinkedList<MyMessage>();
 		for (int i = 0; i < sim.getcEmpNumber(); i++) {
-			employees.add(new Employee(i, EmployeeType.C));
+			employees.add(new Employee(i, EmployeeType.B));
 			Employee employee = employees.get(i);
 			employee.setPosition(Position.STORAGE);
 			freeEmployees.add(employee);

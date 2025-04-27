@@ -1,5 +1,5 @@
 package Entities;
-
+import Entities.States.Process;
 public class AssemblyStation implements Comparable<AssemblyStation> {
     private int id;
     public AssemblyStation(int id) {

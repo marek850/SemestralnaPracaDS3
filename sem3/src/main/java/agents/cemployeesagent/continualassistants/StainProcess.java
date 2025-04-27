@@ -5,7 +5,7 @@ import Entities.States.OrderItemState;
 import OSPABA.*;
 import simulation.*;
 import agents.cemployeesagent.*;
-import OSPABA.Process;
+import Entities.States.Process;
 import OSPRNG.EmpiricPair;
 import OSPRNG.EmpiricRNG;
 import OSPRNG.UniformContinuousRNG;
@@ -17,8 +17,8 @@ public class StainProcess extends OSPABA.Process
 			new UniformContinuousRNG(3000d, 4200d), 0.1),
 			new EmpiricPair(new UniformContinuousRNG(4200d, 9000d), 0.6),
 			new EmpiricPair(new UniformContinuousRNG(9000d, 12000d), 0.3));
-	private  UniformContinuousRNG chairStainTime = new UniformContinuousRNG(40d, 200d);
-	private  UniformContinuousRNG wardrobeStainTime = new UniformContinuousRNG(250d, 560d);
+	private  UniformContinuousRNG chairStainTime = new UniformContinuousRNG(2400d, 12000d);
+	private  UniformContinuousRNG wardrobeStainTime = new UniformContinuousRNG(15000d, 33600d);
 	public StainProcess(int id, Simulation mySim, CommonAgent myAgent)
 	{
 		super(id, mySim, myAgent);
@@ -36,6 +36,7 @@ public class StainProcess extends OSPABA.Process
 	{
 		MyMessage myMessage = (MyMessage) message;
 		myMessage.getEmployee().setState(EmployeeState.STAINING);
+		myMessage.getAssemblyStation().setCurrentProcess(Process.STAINING);
 		myMessage.getOrderItem().setState(OrderItemState.BEING_STAINED);
 		myMessage.setCode(Mc.stainOrderItem);
 		switch (myMessage.getOrderItem().getItemType()) {

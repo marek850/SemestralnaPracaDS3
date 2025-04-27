@@ -5,7 +5,7 @@ import Entities.States.OrderItemState;
 import OSPABA.*;
 import simulation.*;
 import agents.cemployeesagent.*;
-import OSPABA.Process;
+import Entities.States.Process;
 import OSPRNG.UniformContinuousRNG;
 
 //meta! id="169"
@@ -31,6 +31,7 @@ public class VarnishProcess extends OSPABA.Process
 	{
 		MyMessage myMessage = (MyMessage) message;
 		myMessage.getEmployee().setState(EmployeeState.VARNISHING);
+		myMessage.getAssemblyStation().setCurrentProcess(Process.VARNISHING);
 		myMessage.getOrderItem().setState(OrderItemState.BEING_VARNISHED);
 		myMessage.setCode(Mc.varnishOrderitem);
 		switch (myMessage.getOrderItem().getItemType()) {

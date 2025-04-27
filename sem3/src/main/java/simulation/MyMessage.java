@@ -36,7 +36,13 @@ public class MyMessage extends OSPABA.MessageForm
 	public void setOrder(Order order) {
 		this.order = order;
 	}
-
+	private double hardwareFitTIme = 0;
+	public double getHardwareFitTIme() {
+		return hardwareFitTIme;
+	}
+	public void setHardwareFitTIme(double hardwareFitTIme) {
+		this.hardwareFitTIme = hardwareFitTIme;
+	}
 	private int aEmployeesNumber = 0;
 	private int cEmployeesNumber = 0;
 	private int aWaitingOrders = 0;

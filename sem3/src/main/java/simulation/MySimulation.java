@@ -64,6 +64,8 @@ public class MySimulation extends OSPABA.Simulation
 		// Collect local statistics into global, update UI, etc...
 		super.replicationFinished();
 		System.out.println("Replication finished");
+		WorkshopAgent workshopAgent = (WorkshopAgent) findAgent(Id.workshopAgent);
+		System.out.println("Cas:" + workshopAgent.getOrderProcessingTimeStat().mean() / 3600);
 	}
 
 	@Override

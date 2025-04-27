@@ -96,10 +96,7 @@ public class Employee {
         return state;
     }
     public void setState(EmployeeState state) {
-        if (type == EmployeeType.C && (state != EmployeeState.IDLE && state != EmployeeState.VARNISHING && state != EmployeeState.MOVING && state != EmployeeState.FITTING)) {
-            throw new IllegalStateException("Employee type C cannot be in state " + state);
-            
-        }
+        
         this.state = state;
     }
     public double getWorkload(double time) {

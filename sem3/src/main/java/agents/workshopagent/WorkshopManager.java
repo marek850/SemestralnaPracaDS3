@@ -29,10 +29,7 @@ public class WorkshopManager extends OSPABA.Manager
 		}
 	}
 
-	//meta! userInfo="Removed from model"
-	public void processFitHardwareOnOrderItem(MessageForm message)
-	{
-	}
+	
 
 	//meta! sender="WorkStationAgent", id="40", type="Response"
 	public void processWorkStationAssignment(MessageForm message)
@@ -67,41 +64,7 @@ public class WorkshopManager extends OSPABA.Manager
 	}
 
 
-	//meta! userInfo="Removed from model"
-	public void processFinishAssembleProcess(MessageForm message)
-	{
-	}
-
-	//meta! userInfo="Removed from model"
-	public void processFinishCutProcess(MessageForm message)
-	{
-	}
-
-	//meta! userInfo="Removed from model"
-	public void processFinishFItHardwareProcess(MessageForm message)
-	{
-	}
-
-	//meta! userInfo="Removed from model"
-	public void processFinishStainProcess(MessageForm message)
-	{
-	}
-
-	//meta! userInfo="Removed from model"
-	public void processFinishVarnishProcess(MessageForm message)
-	{
-	}
-
-	//meta! userInfo="Removed from model"
-	public void processAssignEmployee(MessageForm message)
-	{
-	}
-
-	//meta! userInfo="Removed from model"
-	public void processVarnishOrderItem(MessageForm message)
-	{
-	}
-
+	
 	//meta! userInfo="Process messages defined in code", id="0"
 	public void processDefault(MessageForm message)
 	{
@@ -129,11 +92,28 @@ public class WorkshopManager extends OSPABA.Manager
 	//meta! sender="CEmployeesAgent", id="146", type="Response"
 	public void processRequestCWaitingOrders(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message.createCopy();
+		if (msg.getAWaitingOrders() < msg.getCWaitingOrders()) {
+			msg.setHardwareFitTIme(myAgent().getFitHardwareTime().sample());
+			msg.setCode(Mc.aFitHardwareOnItem);
+			msg.setAddressee(Id.aEmployeesAgent);
+			request(msg);
+		} else{
+			msg.setHardwareFitTIme(myAgent().getFitHardwareTime().sample());
+			msg.setCode(Mc.cFitHardwareOnItem);
+			msg.setAddressee(Id.cEmployeesAgent);
+			request(msg);
+		}
 	}
 
 	//meta! sender="AEmployeesAgent", id="143", type="Response"
 	public void processRequestAWaitingOrders(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message.createCopy();
+		msg.setCode(Mc.requestCWaitingOrders);
+		msg.setAddressee(Id.cEmployeesAgent);
+		request(msg);
+		
 	}
 
 	//meta! sender="BEmployeesAgent", id="148", type="Response"
@@ -148,7 +128,15 @@ public class WorkshopManager extends OSPABA.Manager
 		} else{
 			orderItem.setState(OrderItemState.FINISHED);
 			Order order = orderItem.getOrder();
+			MyMessage stationMessage = new MyMessage(mySim());
+			stationMessage.setAssemblyStation(msg.getAssemblyStation());
+			msg.setAssemblyStation(null);
+			orderItem.setAssemblyStation(null);
+			stationMessage.setCode(Mc.workStationRelease);
+			stationMessage.setAddressee(Id.workStationAgent);
+			notice(stationMessage);
 			if (order.isOrderCompleted()) {
+				myAgent().getOrderProcessingTimeStat().addSample(mySim().currentTime() - order.getOrderArrivalTime());
 				msg.setCode(Mc.processOrder);
 				response(msg);
 			}
@@ -167,6 +155,22 @@ public class WorkshopManager extends OSPABA.Manager
 	//meta! sender="CEmployeesAgent", id="156", type="Response"
 	public void processCFitHardwareOnItem(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message.createCopy();
+		OrderItem orderItem = msg.getOrderItem();
+		orderItem.setState(OrderItemState.FINISHED);
+		Order order = orderItem.getOrder();
+		MyMessage stationMessage = new MyMessage(mySim());
+		stationMessage.setAssemblyStation(msg.getAssemblyStation());
+		msg.setAssemblyStation(null);
+		orderItem.setAssemblyStation(null);
+		stationMessage.setCode(Mc.workStationRelease);
+		stationMessage.setAddressee(Id.workStationAgent);
+		notice(stationMessage);
+		if (order.isOrderCompleted()) {
+			myAgent().getOrderProcessingTimeStat().addSample(mySim().currentTime() - order.getOrderArrivalTime());
+			msg.setCode(Mc.processOrder);
+			response(msg);
+		}
 	}
 
 	//meta! sender="CEmployeesAgent", id="149", type="Response"
@@ -174,7 +178,7 @@ public class WorkshopManager extends OSPABA.Manager
 	{
 		MyMessage msg = (MyMessage) message.createCopy();
 		msg.setCode(Mc.assembleOrderItem);
-		msg.setAddressee(Id.cEmployeesAgent);
+		msg.setAddressee(Id.bEmployeesAgent);
 		request(msg);
 	}
 
@@ -199,6 +203,22 @@ public class WorkshopManager extends OSPABA.Manager
 	//meta! sender="AEmployeesAgent", id="157", type="Response"
 	public void processAFitHardwareOnItem(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message.createCopy();
+		OrderItem orderItem = msg.getOrderItem();
+		orderItem.setState(OrderItemState.FINISHED);
+		Order order = orderItem.getOrder();
+		MyMessage stationMessage = new MyMessage(mySim());
+		stationMessage.setAssemblyStation(msg.getAssemblyStation());
+		msg.setAssemblyStation(null);
+		orderItem.setAssemblyStation(null);
+		stationMessage.setCode(Mc.workStationRelease);
+		stationMessage.setAddressee(Id.workStationAgent);
+		notice(stationMessage);
+		if (order.isOrderCompleted()) {
+			myAgent().getOrderProcessingTimeStat().addSample(mySim().currentTime() - order.getOrderArrivalTime());
+			msg.setCode(Mc.processOrder);
+			response(msg);
+		}
 	}
 
 	//meta! sender="BEmployeesAgent", id="159", type="Request"
@@ -218,11 +238,33 @@ public class WorkshopManager extends OSPABA.Manager
 	//meta! sender="AEmployeesAgent", id="177", type="Response"
 	public void processRequestNumOfFreeEmpA(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message.createCopy();
+		if (msg.getAEmployeesNumber() > 0) {
+			msg.setHardwareFitTIme(myAgent().getFitHardwareTime().sample());
+			msg.setCode(Mc.aFitHardwareOnItem);
+			msg.setAddressee(Id.aEmployeesAgent);
+			request(msg);
+		} else{
+			msg.setCode(Mc.requestNumOfFreeEmpC);
+			msg.setAddressee(Id.cEmployeesAgent);
+			request(msg);
+		}
 	}
 
 	//meta! sender="CEmployeesAgent", id="178", type="Response"
 	public void processRequestNumOfFreeEmpC(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message.createCopy();
+		if (msg.getCEmployeesNumber() > 0) {
+			msg.setHardwareFitTIme(myAgent().getFitHardwareTime().sample());
+			msg.setCode(Mc.cFitHardwareOnItem);
+			msg.setAddressee(Id.cEmployeesAgent);
+			request(msg);
+		} else{
+			msg.setCode(Mc.requestAWaitingOrders);
+			msg.setAddressee(Id.aEmployeesAgent);
+			request(msg);
+		}
 	}
 
 	//meta! userInfo="Generated code: do not modify", tag="begin"

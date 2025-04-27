@@ -5,6 +5,7 @@ import Entities.States.EmployeeState;
 import Entities.States.OrderItemState;
 import Entities.States.Position;
 import OSPABA.*;
+import agents.workshopagent.WorkshopAgent;
 import simulation.*;
 
 //meta! id="6"
@@ -57,26 +58,48 @@ public class AEmployeesManager extends OSPABA.Manager
 	//meta! sender="WorkshopAgent", id="157", type="Request"
 	public void processAFitHardwareOnItem(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message;
+		//ak nie je volny zamestnanec tak dam spravu do cakania
+		if (myAgent().getFreeEmployees().isEmpty()) {
+			msg.getOrderItem().setState(OrderItemState.WAITING_FOR_FITTING);
+			myAgent().addWaitingOrderFitting(msg);
+		} else{
+			//ak je volny zamestnanec tak skontrolujem ci ho treba presunut
+			msg.setEmployee(myAgent().assignEmployee());
+			if(msg.getEmployee().getCurrentPosition() == Position.ASSEMBLY_STATION && msg.getEmployee().getStation() == msg.getAssemblyStation()) {
+				//ak je uz na montaznom mieste tak zacne s montazou
+				msg.setCode(Mc.aFitHardwareOnItem);
+				msg.setAddressee(myAgent().findAssistant(Id.aFitHardwareProcess));
+				startContinualAssistant(msg);
+			}else {
+				//ak noie je v sklade tak ho tam presuniem
+				msg.setCode(Mc.transferAEmployee);
+				msg.setAddressee(myAgent().parent());
+				request(msg);
+			}
+			
+		}
 	}
 
 	//meta! sender="WorkshopAgent", id="158", type="Response"
 	public void processTransferAEmployee(MessageForm message)
 	{
 		MyMessage msg = (MyMessage) message;
-		switch (msg.getOrderItem().getState()) {
-			case MATERIAL_PREPARED:
-				msg.setCode(Mc.cutting);
-				msg.setAddressee(myAgent().findAssistant(Id.cutProcess));
-				startContinualAssistant(msg);
-				break;
-			case PENDING:
-				msg.setCode(Mc.preparingMaterial);
-				msg.setAddressee(myAgent().findAssistant(Id.materialPrepareProcess));
-				startContinualAssistant(msg);
-				break;
-			default:
-				break;
+		OrderItemState state = msg.getOrderItem().getState();
+		if (state == OrderItemState.PENDING) {
+			msg.setCode(Mc.preparingMaterial);
+			msg.setAddressee(myAgent().findAssistant(Id.materialPrepareProcess));
+			startContinualAssistant(msg);
+		} else if(state == OrderItemState.MATERIAL_PREPARED){
+			msg.setCode(Mc.cutting);
+			msg.setAddressee(myAgent().findAssistant(Id.cutProcess));
+			startContinualAssistant(msg);
+		} else {
+			msg.setCode(Mc.aFitHardwareOnItem);
+			msg.setAddressee(myAgent().findAssistant(Id.aFitHardwareProcess));
+			startContinualAssistant(msg);
 		}
+		
 	}
 
 	//meta! sender="WorkshopAgent", id="147", type="Request"
@@ -85,6 +108,8 @@ public class AEmployeesManager extends OSPABA.Manager
 		MyMessage msg = (MyMessage) message;
 		//ak nie je volny zamestnanec tak dam spravu do cakania
 		if (myAgent().getFreeEmployees().isEmpty()) {
+			WorkshopAgent statagent = (WorkshopAgent)mySim().findAgent(Id.workshopAgent);
+			statagent.getWaitingOrders().addSample(myAgent().getWaitingOrdersCutting().size());
 			myAgent().addWaitingOrderCutting(msg);
 		} else{
 			//ak je volny zamestnanec tak skontrolujem ci ho treba presunut
@@ -108,13 +133,14 @@ public class AEmployeesManager extends OSPABA.Manager
 	//meta! sender="AFitHardwareProcess", id="174", type="Finish"
 	public void processFinishAFitHardwareProcess(MessageForm message)
 	{
-	}
-
-	//meta! sender="CutProcess", id="162", type="Finish"
-	public void processFinishCutProcess(MessageForm message)
-	{
 		MyMessage msg = (MyMessage) message.createCopy();
 		Employee finishedEmployee = msg.getEmployee();
+		handleFinishedEmployee(finishedEmployee);
+		msg.setEmployee(null);
+		msg.setCode(Mc.aFitHardwareOnItem);
+		response(msg);
+	}
+	public void handleFinishedEmployee(Employee finishedEmployee) {
 		if (!myAgent().getWaitingOrdersHardwareFit().isEmpty()) {
 			//ak caka objednavka na montaz kovani je uprednostnena a zamestnanec sa musi presunut na ine montazne miesto
 			MyMessage waitingOrder = myAgent().getWaitingOrderFitting();
@@ -125,6 +151,8 @@ public class AEmployeesManager extends OSPABA.Manager
 		} else if(!myAgent().getWaitingOrdersCutting().isEmpty()) {
 			//ak caka objednavka na rezanie tak presunieme agenta do skladu
 			MyMessage waitingOrder = myAgent().getWaitingOrderCutting();
+			WorkshopAgent statagent = (WorkshopAgent)mySim().findAgent(Id.workshopAgent);
+			statagent.getWaitingOrders().addSample(myAgent().getWaitingOrdersCutting().size());
 			waitingOrder.setEmployee(finishedEmployee);
 			waitingOrder.setCode(Mc.transferAEmployee);
 			waitingOrder.setAddressee(myAgent().parent());
@@ -134,6 +162,13 @@ public class AEmployeesManager extends OSPABA.Manager
 			finishedEmployee.setState(EmployeeState.IDLE);
 			myAgent().releaseEmployee(finishedEmployee);
 		}
+	}
+	//meta! sender="CutProcess", id="162", type="Finish"
+	public void processFinishCutProcess(MessageForm message)
+	{
+		MyMessage msg = (MyMessage) message.createCopy();
+		Employee finishedEmployee = msg.getEmployee();
+		handleFinishedEmployee(finishedEmployee);
 		//Poslem agentovi WorkshopAgent odpoved s narezanym kusom objednavky
 		msg.getOrderItem().setState(OrderItemState.CUT);
 		msg.setCode(Mc.cutOrderItem);
