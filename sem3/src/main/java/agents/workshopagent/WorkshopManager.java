@@ -3,6 +3,7 @@ package agents.workshopagent;
 import Entities.Employee;
 import Entities.Order;
 import Entities.OrderItem;
+import Entities.States.FurnitureType;
 import Entities.States.OrderItemState;
 import OSPABA.*;
 import simulation.*;
@@ -138,6 +139,20 @@ public class WorkshopManager extends OSPABA.Manager
 	//meta! sender="BEmployeesAgent", id="148", type="Response"
 	public void processAssembleOrderItem(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message.createCopy();
+		OrderItem orderItem = msg.getOrderItem();
+		if (orderItem.getItemType() == FurnitureType.WARDROBE) {
+			msg.setCode(Mc.requestNumOfFreeEmpA);
+			msg.setAddressee(Id.aEmployeesAgent);
+			request(msg);
+		} else{
+			orderItem.setState(OrderItemState.FINISHED);
+			Order order = orderItem.getOrder();
+			if (order.isOrderCompleted()) {
+				msg.setCode(Mc.processOrder);
+				response(msg);
+			}
+		}
 	}
 
 	//meta! sender="AEmployeesAgent", id="158", type="Request"
@@ -157,20 +172,28 @@ public class WorkshopManager extends OSPABA.Manager
 	//meta! sender="CEmployeesAgent", id="149", type="Response"
 	public void processVarnishOrderitem(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message.createCopy();
+		msg.setCode(Mc.assembleOrderItem);
+		msg.setAddressee(Id.cEmployeesAgent);
+		request(msg);
 	}
 
 	//meta! sender="AEmployeesAgent", id="147", type="Response"
 	public void processCutOrderItem(MessageForm message)
 	{
 		MyMessage msg = (MyMessage) message.createCopy();
-		msg.setCode(Mc.assembleOrderItem);
-		msg.setAddressee(Id.bEmployeesAgent);
+		msg.setCode(Mc.varnishOrderitem);
+		msg.setAddressee(Id.cEmployeesAgent);
 		request(msg);
 	}
 
 	//meta! sender="CEmployeesAgent", id="160", type="Request"
 	public void processTransferCEmployee(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message.createCopy();
+		msg.setCode(Mc.transferEmployee);
+		msg.setAddressee(Id.employeeTransferAgent);
+		request(msg);
 	}
 
 	//meta! sender="AEmployeesAgent", id="157", type="Response"
@@ -181,6 +204,10 @@ public class WorkshopManager extends OSPABA.Manager
 	//meta! sender="BEmployeesAgent", id="159", type="Request"
 	public void processTransferBEmployee(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message.createCopy();
+		msg.setCode(Mc.transferEmployee);
+		msg.setAddressee(Id.employeeTransferAgent);
+		request(msg);
 	}
 
 	//meta! sender="CEmployeesAgent", id="154", type="Response"

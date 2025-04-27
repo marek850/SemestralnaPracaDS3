@@ -49,6 +49,9 @@ public class AEmployeesManager extends OSPABA.Manager
 	//meta! sender="WorkshopAgent", id="143", type="Request"
 	public void processRequestAWaitingOrders(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message.createCopy();
+		msg.setAWaitingOrders(myAgent().getWaitingOrdersHardwareFit().size());
+		response(msg);
 	}
 
 	//meta! sender="WorkshopAgent", id="157", type="Request"
@@ -116,22 +119,23 @@ public class AEmployeesManager extends OSPABA.Manager
 			//ak caka objednavka na montaz kovani je uprednostnena a zamestnanec sa musi presunut na ine montazne miesto
 			MyMessage waitingOrder = myAgent().getWaitingOrderFitting();
 			waitingOrder.setEmployee(finishedEmployee);
-			msg.setCode(Mc.transferAEmployee);
-			msg.setAddressee(myAgent().parent());
-			request(msg);
+			waitingOrder.setCode(Mc.transferAEmployee);
+			waitingOrder.setAddressee(myAgent().parent());
+			request(waitingOrder);
 		} else if(!myAgent().getWaitingOrdersCutting().isEmpty()) {
 			//ak caka objednavka na rezanie tak presunieme agenta do skladu
 			MyMessage waitingOrder = myAgent().getWaitingOrderCutting();
 			waitingOrder.setEmployee(finishedEmployee);
-			msg.setCode(Mc.transferAEmployee);
-			msg.setAddressee(myAgent().parent());
-			request(msg);
+			waitingOrder.setCode(Mc.transferAEmployee);
+			waitingOrder.setAddressee(myAgent().parent());
+			request(waitingOrder);
 		} else {
 			//ak necaka ziadna objednavka
 			finishedEmployee.setState(EmployeeState.IDLE);
 			myAgent().releaseEmployee(finishedEmployee);
 		}
 		//Poslem agentovi WorkshopAgent odpoved s narezanym kusom objednavky
+		msg.getOrderItem().setState(OrderItemState.CUT);
 		msg.setCode(Mc.cutOrderItem);
 		msg.setEmployee(null);
 		response(msg);
@@ -140,6 +144,9 @@ public class AEmployeesManager extends OSPABA.Manager
 	//meta! sender="WorkshopAgent", id="177", type="Request"
 	public void processRequestNumOfFreeEmpA(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message.createCopy();
+		msg.setAEmployeesNumber(myAgent().getFreeEmployees().size());
+		response(msg);
 	}
 
 	//meta! sender="MaterialPrepareProcess", id="182", type="Finish"

@@ -1,13 +1,19 @@
 package agents.bemployeesagent.continualassistants;
 
+import Entities.States.EmployeeState;
+import Entities.States.OrderItemState;
 import OSPABA.*;
 import agents.bemployeesagent.*;
 import simulation.*;
 import OSPABA.Process;
+import OSPRNG.UniformContinuousRNG;
 
 //meta! id="164"
 public class AssembleProcess extends OSPABA.Process
 {
+	private  UniformContinuousRNG tableAssembleTime = new UniformContinuousRNG(1800d, 3600d);
+	private  UniformContinuousRNG chairAssembleTime = new UniformContinuousRNG(840d, 1440d);
+	private  UniformContinuousRNG wardronbeAssembleTime = new UniformContinuousRNG(900d, 1500d);
 	public AssembleProcess(int id, Simulation mySim, CommonAgent myAgent)
 	{
 		super(id, mySim, myAgent);
@@ -23,6 +29,23 @@ public class AssembleProcess extends OSPABA.Process
 	//meta! sender="BEmployeesAgent", id="165", type="Start"
 	public void processStart(MessageForm message)
 	{
+		MyMessage myMessage = (MyMessage) message;
+		myMessage.getEmployee().setState(EmployeeState.ASSEMBLING);
+		myMessage.getOrderItem().setState(OrderItemState.BEING_ASSEMBLED);
+		myMessage.setCode(Mc.assembleOrderItem);
+		switch (myMessage.getOrderItem().getItemType()) {
+			case CHAIR:
+				hold(chairAssembleTime.sample(), myMessage);
+				break;
+			case TABLE:
+				hold(tableAssembleTime.sample(), myMessage);
+				break;
+			case WARDROBE:
+				hold(wardronbeAssembleTime.sample(), myMessage);
+				break;
+			default:
+				break;
+		}
 	}
 
 	//meta! userInfo="Process messages defined in code", id="0"
@@ -30,6 +53,14 @@ public class AssembleProcess extends OSPABA.Process
 	{
 		switch (message.code())
 		{
+			case Mc.assembleOrderItem:
+				MyMessage myMessage = (MyMessage) message;
+				myMessage.getEmployee().setState(EmployeeState.IDLE);
+				myMessage.getOrderItem().setState(OrderItemState.ASSEMBLED);
+				myMessage.setCode(Mc.finish);
+				myMessage.setAddressee(myAgent());
+				notice(myMessage);
+				break;
 		}
 	}
 

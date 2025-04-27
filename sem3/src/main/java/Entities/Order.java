@@ -5,13 +5,22 @@ import java.util.List;
 
 import com.sem3.Entities.States.OrderState;
 
+import Entities.States.OrderItemState;
+
 public class Order {
     private final int id;
     private final List<OrderItem> items;
     private OrderState state;
     private double orderArrivalTime;
 
-   
+    public boolean isOrderCompleted() {
+        for (OrderItem item : items) {
+            if (item.getState() != OrderItemState.FINISHED ) {
+                return false;
+            }
+        }
+        return true;
+    }
     public double getOrderArrivalTime() {
         return orderArrivalTime;
     }

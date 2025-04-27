@@ -26,12 +26,19 @@ import org.jfree.ui.RefineryUtilities;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 
+import Entities.AssemblyStation;
+import Entities.Employee;
 import Entities.Order;
 import Entities.OrderItem;
+import Entities.States.Position;
 import OSPABA.ISimDelegate;
 import OSPABA.SimState;
 import OSPABA.Simulation;
+import agents.aemployeesagent.AEmployeesAgent;
+import agents.bemployeesagent.BEmployeesAgent;
+import agents.cemployeesagent.CEmployeesAgent;
 import agents.surroundingagent.SurroundingAgent;
+import agents.workstationagent.WorkStationAgent;
 import simulation.Id;
 import simulation.Mc;
 import simulation.MySimulation;
@@ -452,6 +459,22 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
             String[] daysOfTheWeek = {"Pondelok", "Utorok", "Streda", "Štvrtok", "Piatok"};
                 simulationTimeLabelTextField.setText("Týždeň: " + (week + 1) + ", Deň: " + daysOfTheWeek[day] + ", Čas: " 
                                                     + String.format("%02d:%02d:%02d", hours, minutes, seconds));
+            
+            
+            ArrayList<Employee> allEmployees = new ArrayList<>();
+            AEmployeesAgent aEmployeesAgent = (AEmployeesAgent) simulation.findAgent(Id.aEmployeesAgent);
+            allEmployees.addAll(aEmployeesAgent.getEmployees());
+            /* BEmployeesAgent bEmployeesAgent = (BEmployeesAgent) simulation.findAgent(Id.bEmployeesAgent);
+            allEmployees.addAll(bEmployeesAgent.getEmployees()); */
+            CEmployeesAgent cEmployeesAgent = (CEmployeesAgent) simulation.findAgent(Id.cEmployeesAgent);
+            allEmployees.addAll(cEmployeesAgent.getEmployees());
+           
+            DefaultTableModel employeeTableModel = (DefaultTableModel) employeesTable.getModel();
+            employeeTableModel.setRowCount(0); 
+            for (Employee employee : allEmployees) {
+                
+                employeeTableModel.addRow(new Object[]{employee.getId(),employee.getType(), employee.getCurrentPosition(), employee.getState(), employee.getCurrentPosition() == Position.STORAGE ? "" : employee.getStation().getId()});
+            }
             // Aktualizácia objednávok
             DefaultTableModel orderTableModel = (DefaultTableModel) ordersTable.getModel();
             orderTableModel.setRowCount(0); 
@@ -460,6 +483,14 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
                 for (OrderItem orderItem : order.getItems()) {
                     orderTableModel.addRow(new Object[]{orderItem.getOrder().getId(), orderItem.getItemType(), orderItem.getState(), "" });
                 }
+            }
+
+            // Aktualizácia montážnych miest
+            DefaultTableModel assemblyTableModel = (DefaultTableModel) assemblyStationsTable.getModel();
+            assemblyTableModel.setRowCount(0); 
+            WorkStationAgent workStationAgent = (WorkStationAgent) simulation.findAgent(Id.workStationAgent);
+            for (AssemblyStation station : workStationAgent.getAssemblyStations()) {
+                assemblyTableModel.addRow(new Object[]{station.getId(), station.getCurrentProcess()});
             }
         }
     }       

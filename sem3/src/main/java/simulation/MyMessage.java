@@ -37,6 +37,34 @@ public class MyMessage extends OSPABA.MessageForm
 		this.order = order;
 	}
 
+	private int aEmployeesNumber = 0;
+	private int cEmployeesNumber = 0;
+	private int aWaitingOrders = 0;
+	public int getAWaitingOrders() {
+		return aWaitingOrders;
+	}
+	public void setAWaitingOrders(int aWaitingOrders) {
+		this.aWaitingOrders = aWaitingOrders;
+	}
+	private int cWaitingOrders = 0;
+	public int getCWaitingOrders() {
+		return cWaitingOrders;
+	}
+	public void setCWaitingOrders(int cWaitingOrders) {
+		this.cWaitingOrders = cWaitingOrders;
+	}
+	public int getAEmployeesNumber() {
+		return aEmployeesNumber;
+	}
+	public void setAEmployeesNumber(int aEmployeesNumber) {
+		this.aEmployeesNumber = aEmployeesNumber;
+	}
+	public int getCEmployeesNumber() {
+		return cEmployeesNumber;
+	}
+	public void setCEmployeesNumber(int cEmployeesNumber) {
+		this.cEmployeesNumber = cEmployeesNumber;
+	}
 	public MyMessage(Simulation mySim)
 	{
 		super(mySim);

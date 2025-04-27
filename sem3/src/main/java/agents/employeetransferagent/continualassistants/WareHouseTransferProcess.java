@@ -45,7 +45,9 @@ public class WareHouseTransferProcess extends OSPABA.Process
 		} else if (myMessage.getOrderItem().getState() == OrderItemState.MATERIAL_PREPARED) {
 			myMessage.getEmployee().setState(EmployeeState.MOVING);
 			hold(transferTimeGenerator.sample(), myMessage);
-		}{
+		}else {
+			myMessage.getEmployee().setState(EmployeeState.MOVING);
+			hold(transferTimeGenerator.sample(), myMessage);
 			
 		}
 	}
@@ -61,6 +63,9 @@ public class WareHouseTransferProcess extends OSPABA.Process
 					myMessage.getEmployee().setPosition(Position.STORAGE);
 					myMessage.getEmployee().setStation(null);
 				}else if (myMessage.getOrderItem().getState() == OrderItemState.MATERIAL_PREPARED) {
+					myMessage.getEmployee().setPosition(Position.ASSEMBLY_STATION);
+					myMessage.getEmployee().setStation(myMessage.getOrderItem().getAssemblyStation());
+				} else {
 					myMessage.getEmployee().setPosition(Position.ASSEMBLY_STATION);
 					myMessage.getEmployee().setStation(myMessage.getOrderItem().getAssemblyStation());
 				}

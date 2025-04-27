@@ -1,5 +1,8 @@
 package agents.employeetransferagent;
 
+import org.apache.commons.math3.geometry.partitioning.BSPTreeVisitor.Order;
+
+import Entities.States.OrderItemState;
 import Entities.States.Position;
 import OSPABA.*;
 import simulation.*;
@@ -29,18 +32,28 @@ public class EmployeeTransferManager extends OSPABA.Manager
 	public void processTransferEmployee(MessageForm message)
 	{
 		MyMessage msg = (MyMessage) message.createCopy();
-		switch (msg.getOrderItem().getState()) {
-			case PENDING:
+		OrderItemState state = msg.getOrderItem().getState();
+		if (state == OrderItemState.PENDING || state == OrderItemState.MATERIAL_PREPARED) {
+			msg.setAddressee(myAgent().findAssistant(Id.wareHouseTransferProcess));
+			startContinualAssistant(msg);
+		} else if(state == OrderItemState.CUT || state == OrderItemState.WAITING_FOR_VARNISH){
+		    if(msg.getEmployee().getCurrentPosition() == Position.STORAGE){
 				msg.setAddressee(myAgent().findAssistant(Id.wareHouseTransferProcess));
 				startContinualAssistant(msg);
-				break;
-			case MATERIAL_PREPARED:
+			}else{
+				msg.setAddressee(myAgent().findAssistant(Id.workStationTransferProcess));
+				startContinualAssistant(msg);
+			}
+		}else if(state == OrderItemState.VARNISHED || state == OrderItemState.WAITING_FOR_ASSEMBLY || state == OrderItemState.STAINED){
+		    if(msg.getEmployee().getCurrentPosition() == Position.STORAGE){
 				msg.setAddressee(myAgent().findAssistant(Id.wareHouseTransferProcess));
 				startContinualAssistant(msg);
-				break;
-			default:
-				break;
+			}else{
+				msg.setAddressee(myAgent().findAssistant(Id.workStationTransferProcess));
+				startContinualAssistant(msg);
+			}
 		}
+		
 	}
 
 	//meta! sender="WorkStationTransferProcess", id="81", type="Finish"

@@ -1,5 +1,9 @@
 package agents.cemployeesagent;
 
+import Entities.Employee;
+import Entities.States.EmployeeState;
+import Entities.States.OrderItemState;
+import Entities.States.Position;
 import OSPABA.*;
 import simulation.*;
 
@@ -24,16 +28,6 @@ public class CEmployeesManager extends OSPABA.Manager
 		}
 	}
 
-	//meta! userInfo="Removed from model"
-	public void processEmployeeCAssignment(MessageForm message)
-	{
-	}
-
-	//meta! userInfo="Removed from model"
-	public void processEmployeeCRelease(MessageForm message)
-	{
-	}
-
 	//meta! userInfo="Process messages defined in code", id="0"
 	public void processDefault(MessageForm message)
 	{
@@ -45,16 +39,42 @@ public class CEmployeesManager extends OSPABA.Manager
 	//meta! sender="WorkshopAgent", id="160", type="Response"
 	public void processTransferCEmployee(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message;
+		if (msg.getOrderItem().getState() == OrderItemState.CUT || msg.getOrderItem().getState() == OrderItemState.WAITING_FOR_VARNISH) {
+			msg.setCode(Mc.varnishOrderitem);
+			msg.setAddressee(myAgent().findAssistant(Id.varnishProcess));
+			startContinualAssistant(msg);
+		}
 	}
 
 	//meta! sender="WorkshopAgent", id="146", type="Request"
 	public void processRequestCWaitingOrders(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message.createCopy();
+		msg.setAWaitingOrders(myAgent().getWaitingOrdersHardwareFit().size());
+		response(msg);
 	}
 
 	//meta! sender="WorkshopAgent", id="149", type="Request"
 	public void processVarnishOrderitem(MessageForm message)
 	{
+		MyMessage msg = (MyMessage)message.createCopy();
+		if (myAgent().getFreeEmployees().isEmpty()) {
+			msg.getOrderItem().setState(OrderItemState.WAITING_FOR_VARNISH);
+			myAgent().addWaitingOrderVarnish(msg);
+		} else{
+			msg.setEmployee(myAgent().assignEmployee());
+			if (msg.getEmployee().getCurrentPosition() == Position.ASSEMBLY_STATION &&
+					msg.getEmployee().getStation() == msg.getAssemblyStation()) {
+
+					msg.setAddressee(myAgent().findAssistant(Id.varnishProcess));
+					startContinualAssistant(msg);
+			} else{
+				msg.setCode(Mc.transferCEmployee);
+				msg.setAddressee(myAgent().parent());
+				request(msg);
+			}
+		}
 	}
 
 	//meta! sender="WorkshopAgent", id="156", type="Request"
@@ -65,11 +85,51 @@ public class CEmployeesManager extends OSPABA.Manager
 	//meta! sender="VarnishProcess", id="170", type="Finish"
 	public void processFinishVarnishProcess(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message.createCopy();
+		if(msg.getOrderItem().isStain()){
+			msg.setAddressee(myAgent().findAssistant(Id.stainProcess));
+			startContinualAssistant(msg);
+		} else{
+			Employee finishedEmployee = msg.getEmployee();
+			handleFinishedEmployee(finishedEmployee);
+			msg.setEmployee(null);
+			msg.setCode(Mc.varnishOrderitem);
+			response(msg);
+		}
 	}
 
 	//meta! sender="StainProcess", id="168", type="Finish"
 	public void processFinishStainProcess(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message.createCopy();
+		Employee finishedEmployee = msg.getEmployee();
+		handleFinishedEmployee(finishedEmployee);
+		msg.setEmployee(null);
+		msg.setCode(Mc.varnishOrderitem);
+		response(msg);
+	}
+
+	public void handleFinishedEmployee(Employee finishedEmployee) {
+		if (!myAgent().getWaitingOrdersHardwareFit().isEmpty()) {
+			//ak caka objednavka na montaz kovani je uprednostnena a zamestnanec sa musi presunut na ine montazne miesto
+			MyMessage waitingOrder = myAgent().getWaitingOrderFitting();
+			waitingOrder.setEmployee(finishedEmployee);
+			waitingOrder.setCode(Mc.transferCEmployee);
+			waitingOrder.setAddressee(myAgent().parent());
+			request(waitingOrder);
+		} else if(!myAgent().getWaitingOrdersVarnish().isEmpty()) {
+			//ak caka objednavka na rezanie tak presunieme agenta do skladu
+			MyMessage waitingOrder = myAgent().getWaitingOrderVarnish();
+			waitingOrder.setEmployee(finishedEmployee);
+			waitingOrder.setCode(Mc.transferCEmployee);
+			waitingOrder.setAddressee(myAgent().parent());
+			request(waitingOrder);
+		} else {
+			//ak necaka ziadna objednavka
+			finishedEmployee.setState(EmployeeState.IDLE);
+			myAgent().releaseEmployee(finishedEmployee);
+		}
+
 	}
 
 	//meta! sender="CFitHardwareProcess", id="172", type="Finish"
@@ -85,6 +145,9 @@ public class CEmployeesManager extends OSPABA.Manager
 	//meta! sender="WorkshopAgent", id="178", type="Request"
 	public void processRequestNumOfFreeEmpC(MessageForm message)
 	{
+		MyMessage msg = (MyMessage) message.createCopy();
+		msg.setCEmployeesNumber(myAgent().getFreeEmployees().size());
+		response(msg);
 	}
 
 	//meta! userInfo="Generated code: do not modify", tag="begin"

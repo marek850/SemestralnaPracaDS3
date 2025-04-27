@@ -1,13 +1,24 @@
 package agents.cemployeesagent.continualassistants;
 
+import Entities.States.EmployeeState;
+import Entities.States.OrderItemState;
 import OSPABA.*;
 import simulation.*;
 import agents.cemployeesagent.*;
 import OSPABA.Process;
+import OSPRNG.EmpiricPair;
+import OSPRNG.EmpiricRNG;
+import OSPRNG.UniformContinuousRNG;
 
 //meta! id="167"
 public class StainProcess extends OSPABA.Process
 {
+	private  EmpiricRNG tableStainTime = new EmpiricRNG(new EmpiricPair(
+			new UniformContinuousRNG(3000d, 4200d), 0.1),
+			new EmpiricPair(new UniformContinuousRNG(4200d, 9000d), 0.6),
+			new EmpiricPair(new UniformContinuousRNG(9000d, 12000d), 0.3));
+	private  UniformContinuousRNG chairStainTime = new UniformContinuousRNG(40d, 200d);
+	private  UniformContinuousRNG wardrobeStainTime = new UniformContinuousRNG(250d, 560d);
 	public StainProcess(int id, Simulation mySim, CommonAgent myAgent)
 	{
 		super(id, mySim, myAgent);
@@ -23,6 +34,23 @@ public class StainProcess extends OSPABA.Process
 	//meta! sender="CEmployeesAgent", id="168", type="Start"
 	public void processStart(MessageForm message)
 	{
+		MyMessage myMessage = (MyMessage) message;
+		myMessage.getEmployee().setState(EmployeeState.STAINING);
+		myMessage.getOrderItem().setState(OrderItemState.BEING_STAINED);
+		myMessage.setCode(Mc.stainOrderItem);
+		switch (myMessage.getOrderItem().getItemType()) {
+			case CHAIR:
+				hold(chairStainTime.sample(), myMessage);
+				break;
+			case TABLE:
+				hold((double)tableStainTime.sample(), myMessage);
+				break;
+			case WARDROBE:
+				hold(wardrobeStainTime.sample(), myMessage);
+				break;
+			default:
+				break;
+		}
 	}
 
 	//meta! userInfo="Process messages defined in code", id="0"
@@ -30,6 +58,16 @@ public class StainProcess extends OSPABA.Process
 	{
 		switch (message.code())
 		{
+			case Mc.stainOrderItem:
+				MyMessage myMessage = (MyMessage) message;
+				myMessage.getEmployee().setState(EmployeeState.IDLE);
+				myMessage.getOrderItem().setState(OrderItemState.STAINED);
+				myMessage.setCode(Mc.finish);
+				myMessage.setAddressee(myAgent());
+				notice(myMessage);
+				break;
+			default:
+				break;
 		}
 	}
 
