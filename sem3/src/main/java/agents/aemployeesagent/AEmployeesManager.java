@@ -1,10 +1,17 @@
 package agents.aemployeesagent;
 
+import java.awt.geom.Point2D;
+
+import Entities.AssemblyStation;
 import Entities.Employee;
 import Entities.States.EmployeeState;
 import Entities.States.OrderItemState;
+import Entities.States.OrderState;
 import Entities.States.Position;
+import Entities.States.Process;
 import OSPABA.*;
+import OSPAnimator.AnimImageItem;
+import UserInterface.AnimatorConfig;
 import agents.workshopagent.WorkshopAgent;
 import simulation.*;
 
@@ -58,7 +65,7 @@ public class AEmployeesManager extends OSPABA.Manager
 	//meta! sender="WorkshopAgent", id="157", type="Request"
 	public void processAFitHardwareOnItem(MessageForm message)
 	{
-		MyMessage msg = (MyMessage) message;
+		MyMessage msg = (MyMessage) message.createCopy();
 		//ak nie je volny zamestnanec tak dam spravu do cakania
 		if (myAgent().getFreeEmployees().isEmpty()) {
 			msg.getOrderItem().setState(OrderItemState.WAITING_FOR_FITTING);
@@ -66,6 +73,7 @@ public class AEmployeesManager extends OSPABA.Manager
 		} else{
 			//ak je volny zamestnanec tak skontrolujem ci ho treba presunut
 			msg.setEmployee(myAgent().assignEmployee());
+			msg.getEmployee().getWorkloadStat().addSample(1d);
 			if(msg.getEmployee().getCurrentPosition() == Position.ASSEMBLY_STATION && msg.getEmployee().getStation() == msg.getAssemblyStation()) {
 				//ak je uz na montaznom mieste tak zacne s montazou
 				msg.setCode(Mc.aFitHardwareOnItem);
@@ -92,6 +100,8 @@ public class AEmployeesManager extends OSPABA.Manager
 			startContinualAssistant(msg);
 		} else if(state == OrderItemState.MATERIAL_PREPARED){
 			msg.setCode(Mc.cutting);
+			msg.getEmployee().setImage(AnimatorConfig.EMPLOYEE);
+			msg.getAssemblyStation().setImage(msg.getOrderItem().getImage());
 			msg.setAddressee(myAgent().findAssistant(Id.cutProcess));
 			startContinualAssistant(msg);
 		} else {
@@ -108,12 +118,18 @@ public class AEmployeesManager extends OSPABA.Manager
 		MyMessage msg = (MyMessage) message;
 		//ak nie je volny zamestnanec tak dam spravu do cakania
 		if (myAgent().getFreeEmployees().isEmpty()) {
-			WorkshopAgent statagent = (WorkshopAgent)mySim().findAgent(Id.workshopAgent);
-			statagent.getWaitingOrders().addSample(myAgent().getWaitingOrdersCutting().size());
+			
 			myAgent().addWaitingOrderCutting(msg);
+			
 		} else{
+			if (msg.getOrderItem().getOrder().getState() == OrderState.UNSTARTED) {
+				msg.getOrderItem().getOrder().setState(OrderState.IN_PROGRESS);
+				WorkshopAgent workshopAgent = (WorkshopAgent) myAgent().parent();
+				workshopAgent.removeUnstartedOrder(msg.getOrderItem().getOrder());
+			}
 			//ak je volny zamestnanec tak skontrolujem ci ho treba presunut
 			msg.setEmployee(myAgent().assignEmployee());
+			msg.getEmployee().getWorkloadStat().addSample(1d);
 			if(msg.getEmployee().getCurrentPosition() == Position.STORAGE) {
 				//ak je uz v sklade nemusim presuvat a zacne s pripravou materialu
 				//msg.setCode(Mc.preparingMaterial);
@@ -135,7 +151,9 @@ public class AEmployeesManager extends OSPABA.Manager
 	{
 		MyMessage msg = (MyMessage) message.createCopy();
 		Employee finishedEmployee = msg.getEmployee();
+		msg.getAssemblyStation().setCurrentProcess(Process.NONE);
 		handleFinishedEmployee(finishedEmployee);
+		msg.getAssemblyStation().setImage(AnimatorConfig.ASSEMBLY_STATION);
 		msg.setEmployee(null);
 		msg.setCode(Mc.aFitHardwareOnItem);
 		response(msg);
@@ -151,8 +169,11 @@ public class AEmployeesManager extends OSPABA.Manager
 		} else if(!myAgent().getWaitingOrdersCutting().isEmpty()) {
 			//ak caka objednavka na rezanie tak presunieme agenta do skladu
 			MyMessage waitingOrder = myAgent().getWaitingOrderCutting();
-			WorkshopAgent statagent = (WorkshopAgent)mySim().findAgent(Id.workshopAgent);
-			statagent.getWaitingOrders().addSample(myAgent().getWaitingOrdersCutting().size());
+			if (waitingOrder.getOrderItem().getOrder().getState() == OrderState.UNSTARTED) {
+				waitingOrder.getOrderItem().getOrder().setState(OrderState.IN_PROGRESS);
+				WorkshopAgent workshopAgent = (WorkshopAgent) myAgent().parent();
+				workshopAgent.removeUnstartedOrder(waitingOrder.getOrderItem().getOrder());
+			}
 			waitingOrder.setEmployee(finishedEmployee);
 			waitingOrder.setCode(Mc.transferAEmployee);
 			waitingOrder.setAddressee(myAgent().parent());
@@ -160,6 +181,15 @@ public class AEmployeesManager extends OSPABA.Manager
 		} else {
 			//ak necaka ziadna objednavka
 			finishedEmployee.setState(EmployeeState.IDLE);
+			finishedEmployee.getWorkloadStat().addSample(0d);
+			if (mySim().animatorExists()) {
+				// Presuň zamestnanca do fronty na dokončenie
+				AssemblyStation station = finishedEmployee.getStation();
+				Point2D startQueue = new Point2D.Double(station.getPosition(mySim().currentTime()).getX(), station.getPosition(mySim().currentTime()).getY() + 40);
+				station.setStartPositionOfQueue(startQueue);
+				moveEmployeeToFinishedQueue(finishedEmployee, station, mySim().currentTime());
+			}
+			
 			myAgent().releaseEmployee(finishedEmployee);
 		}
 	}
@@ -167,6 +197,7 @@ public class AEmployeesManager extends OSPABA.Manager
 	public void processFinishCutProcess(MessageForm message)
 	{
 		MyMessage msg = (MyMessage) message.createCopy();
+		msg.getAssemblyStation().setCurrentProcess(Process.NONE);
 		Employee finishedEmployee = msg.getEmployee();
 		handleFinishedEmployee(finishedEmployee);
 		//Poslem agentovi WorkshopAgent odpoved s narezanym kusom objednavky
@@ -197,6 +228,23 @@ public class AEmployeesManager extends OSPABA.Manager
 	//meta! userInfo="Generated code: do not modify", tag="begin"
 	public void init()
 	{
+	}
+	public void moveEmployeeToFinishedQueue(AnimImageItem employee, 
+                                               AssemblyStation station,
+                                               double simTime) {
+		Point2D start = employee.getPosition(simTime);
+		Point2D target = station.getNextFinishedPosition();
+
+		// Cesta: vystúpi hore, presunie sa horizontálne, potom zostúpi na pozíciu
+		Point2D[] path = new Point2D[] {
+			new Point2D.Double(start.getX(), start.getY()),
+			new Point2D.Double(start.getX(), target.getY()),
+			target
+		};
+
+		employee.startAnim(simTime, 3, path);
+		employee.setZIndex(station.getFinishedCount());
+		station.incrementFinishedCount();
 	}
 
 	@Override
@@ -232,6 +280,7 @@ public class AEmployeesManager extends OSPABA.Manager
 		case Mc.transferAEmployee:
 			processTransferAEmployee(message);
 		break;
+
 		case Mc.cutOrderItem:
 			processCutOrderItem(message);
 		break;

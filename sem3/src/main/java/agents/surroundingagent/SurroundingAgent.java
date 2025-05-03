@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Random;
 
 import Entities.Order;
-import Generators.DiscreteGenerator;
 import OSPABA.*;
 import OSPRNG.UniformDiscreteRNG;
 import simulation.*;
@@ -23,8 +22,8 @@ public class SurroundingAgent extends OSPABA.Agent
 	public UniformDiscreteRNG getStainProbGen() {
 		return stainProbGen;
 	}
-	private Random orderIDGen = new Random();
-	private Random itemIDGen = new Random();
+	private Random orderIDGen;
+	private Random itemIDGen;
 
 	public UniformDiscreteRNG getItemNumberGen() {
 		return itemNumberGen;
@@ -52,6 +51,12 @@ public class SurroundingAgent extends OSPABA.Agent
 	public SurroundingAgent(int id, Simulation mySim, Agent parent)
 	{
 		super(id, mySim, parent);
+		MySimulation sim = (MySimulation) mySim;
+		itemNumberGen = new UniformDiscreteRNG(1, 5/* , sim.seedGenerator */);
+		itemTypeGen = new UniformDiscreteRNG(0, 100/* ,sim.seedGenerator */);
+		stainProbGen = new UniformDiscreteRNG(0, 100/* ,sim.seedGenerator */);
+		orderIDGen = new Random(/* sim.seedGenerator.nextInt(10000000) */);
+		itemIDGen = new Random(/* sim.seedGenerator.nextInt(10000000) */);
 		init();
 	}
 

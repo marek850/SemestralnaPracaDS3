@@ -1,9 +1,9 @@
 package Entities.States;
 
 public enum OrderState {
-    UNSTARTED("Nezačaté"),
+    UNSTARTED("Nezačatá"),
     IN_PROGRESS("Prebieha spracovanie"),
-    COMPLETED("Dokončené");
+    COMPLETED("Dokončená");
     private final String displayName;
     OrderState(String string) {
        displayName = string;

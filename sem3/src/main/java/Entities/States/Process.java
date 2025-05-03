@@ -1,7 +1,7 @@
 package Entities.States;
 
 public enum Process {
-    NONE("Žiadny"),
+    NONE("Žiadna"),
     CUTTING("Rezanie"),
     VARNISHING("Morenie"),
     STAINING("Lakovanie"),

@@ -12,10 +12,12 @@ import simulation.*;
 //meta! id="37"
 public class ArrivalPlanner extends OSPABA.Scheduler
 {
-	private ExponentialRNG arrivalTimeGenerator = new ExponentialRNG((double) 1800);
+	private ExponentialRNG arrivalTimeGenerator;
 	public ArrivalPlanner(int id, Simulation mySim, CommonAgent myAgent)
 	{
 		super(id, mySim, myAgent);
+		MySimulation simulation = (MySimulation) mySim;
+		arrivalTimeGenerator = new ExponentialRNG(1800d/* , simulation.seedGenerator */);
 	}
 
 	@Override

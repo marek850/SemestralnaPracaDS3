@@ -33,6 +33,9 @@ public class EmployeeTransferManager extends OSPABA.Manager
 	{
 		MyMessage msg = (MyMessage) message.createCopy();
 		OrderItemState state = msg.getOrderItem().getState();
+		if(msg.getOrderItem().getId() == 1062081874){
+			System.out.println("x");
+		}
 		if (state == OrderItemState.PENDING || state == OrderItemState.MATERIAL_PREPARED) {
 			msg.setAddressee(myAgent().findAssistant(Id.wareHouseTransferProcess));
 			startContinualAssistant(msg);
@@ -60,6 +63,7 @@ public class EmployeeTransferManager extends OSPABA.Manager
 	public void processFinishWorkStationTransferProcess(MessageForm message)
 	{	
 		MyMessage msg = (MyMessage) message.createCopy();
+		msg.setCode(Mc.transferEmployee);
 		msg.getEmployee().setPosition(Position.ASSEMBLY_STATION);
 		response(msg);
 	}

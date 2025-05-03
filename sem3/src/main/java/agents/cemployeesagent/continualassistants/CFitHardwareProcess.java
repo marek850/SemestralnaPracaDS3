@@ -27,7 +27,7 @@ public class CFitHardwareProcess extends OSPABA.Process
 	//meta! sender="CEmployeesAgent", id="172", type="Start"
 	public void processStart(MessageForm message)
 	{
-		MyMessage myMessage = (MyMessage) message;
+		MyMessage myMessage = (MyMessage) message.createCopy();
 		myMessage.getEmployee().setState(EmployeeState.FITTING);
 		myMessage.getOrderItem().setState(OrderItemState.BEING_FITTED);
 		myMessage.setCode(Mc.cFitHardwareOnItem);
@@ -40,7 +40,7 @@ public class CFitHardwareProcess extends OSPABA.Process
 		switch (message.code())
 		{
 			case Mc.cFitHardwareOnItem:
-				MyMessage myMessage = (MyMessage) message;
+				MyMessage myMessage = (MyMessage) message.createCopy();
 				myMessage.getOrderItem().setState(OrderItemState.FITTED);
 				myMessage.getAssemblyStation().setCurrentProcess(Process.FITTING);
 				myMessage.getEmployee().setState(EmployeeState.IDLE);

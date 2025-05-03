@@ -3,7 +3,7 @@ package Entities;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sem3.Entities.States.OrderState;
+import Entities.States.OrderState;
 
 import Entities.States.OrderItemState;
 
@@ -30,6 +30,7 @@ public class Order {
     public Order(int id) {
         this.id = id;
         this.items = new ArrayList<>();
+        this.state = OrderState.UNSTARTED;
     }
     public int getId() {
         return id;

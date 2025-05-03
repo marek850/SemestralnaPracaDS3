@@ -11,7 +11,6 @@ public class Mc extends OSPABA.IdList
 	public static final int cutOrderItem = 1033;
 	public static final int assembleOrderItem = 1034;
 	public static final int varnishOrderitem = 1035;
-	public static final int stainOrderItem = 1036;
 	public static final int cFitHardwareOnItem = 1038;
 	public static final int initialisation = 1002;
 	public static final int aFitHardwareOnItem = 1039;
@@ -31,4 +30,5 @@ public class Mc extends OSPABA.IdList
 	// 1..1000 range reserved for user
 	public static final int preparingMaterial = 3;
 	public static final int cutting = 4;
+	public static final int stainOrderItem = 5;
 }

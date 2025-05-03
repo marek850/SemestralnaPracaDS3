@@ -2,8 +2,10 @@ package Entities;
 
 import Entities.States.FurnitureType;
 import Entities.States.OrderItemState;
+import OSPAnimator.AnimImageItem;
+import UserInterface.AnimatorConfig;
 
-public class OrderItem {
+public class OrderItem extends AnimImageItem{
     private int id;
     private double orderArrivalTime;
     private FurnitureType itemType;
@@ -24,9 +26,23 @@ public class OrderItem {
         this.assemblyStation = assemblyStation;
     }
     public OrderItem(int id, double orderArrivalTime, FurnitureType itemType) {
+        super(AnimatorConfig.CHAIR, 36, 36);
         this.id = id;
         this.orderArrivalTime = orderArrivalTime;
         this.itemType = itemType;
+        setZIndex(1);
+        switch (itemType) {
+            case CHAIR:
+                setImage(AnimatorConfig.CHAIR);
+                break;
+            case TABLE:
+                setImage(AnimatorConfig.TABLE);
+                break;
+            case WARDROBE:
+                setImage(AnimatorConfig.WARDROBE);
+                break;
+            default:
+        }
     }
     public void setState(OrderItemState state) {
         this.state = state;

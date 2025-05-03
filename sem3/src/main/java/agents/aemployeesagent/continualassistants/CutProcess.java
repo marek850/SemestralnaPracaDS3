@@ -14,15 +14,19 @@ import OSPRNG.UniformContinuousRNG;
 //meta! id="161"
 public class CutProcess extends OSPABA.Process
 {
-	private EmpiricRNG tableCutTime = new EmpiricRNG(
-		new EmpiricPair(new UniformContinuousRNG(600d, 1500d), 0.6),
-		new EmpiricPair(new UniformContinuousRNG(1500d, 3000d), 0.4)
-		);
-	private UniformContinuousRNG chairCutTime = new UniformContinuousRNG(720d, 960d);
-	private UniformContinuousRNG wardrobeCutTime = new UniformContinuousRNG(900d, 4800d);
+	private EmpiricRNG tableCutTime ;
+	private UniformContinuousRNG chairCutTime;
+	private UniformContinuousRNG wardrobeCutTime;
 	public CutProcess(int id, Simulation mySim, CommonAgent myAgent)
 	{
 		super(id, mySim, myAgent);
+		MySimulation simulation = (MySimulation) mySim;
+		tableCutTime = new EmpiricRNG(/* simulation.seedGenerator, */
+		new EmpiricPair(new UniformContinuousRNG(600d, 1500d), 0.6),
+		new EmpiricPair(new UniformContinuousRNG(1500d, 3000d), 0.4)
+		);
+	chairCutTime = new UniformContinuousRNG(720d, 960d/* ,simulation.seedGenerator */);
+	wardrobeCutTime = new UniformContinuousRNG(900d, 4800d/* ,simulation.seedGenerator */);
 	}
 
 	@Override
@@ -35,7 +39,7 @@ public class CutProcess extends OSPABA.Process
 	//meta! sender="AEmployeesAgent", id="162", type="Start"
 	public void processStart(MessageForm message)
 	{
-		MyMessage myMessage = (MyMessage) message;
+		MyMessage myMessage = (MyMessage) message.createCopy();
 		myMessage.getEmployee().setState(EmployeeState.CUTTING);
 		myMessage.getAssemblyStation().setCurrentProcess(Process.CUTTING);
 		myMessage.getOrderItem().setState(OrderItemState.BEING_CUT);

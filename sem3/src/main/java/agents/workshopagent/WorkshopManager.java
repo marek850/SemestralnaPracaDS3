@@ -78,6 +78,7 @@ public class WorkshopManager extends OSPABA.Manager
 	{
 		MyMessage newMessage = (MyMessage)message.createCopy();
 		Order order = (Order)newMessage.getOrder();
+		myAgent().addUnstartedOrder(order);
 		for (OrderItem item : order.getItems())
 		{
 			item.setState(OrderItemState.PENDING);
@@ -186,6 +187,9 @@ public class WorkshopManager extends OSPABA.Manager
 	public void processCutOrderItem(MessageForm message)
 	{
 		MyMessage msg = (MyMessage) message.createCopy();
+		if(msg.getOrderItem().getId() == 1062081874){
+			System.out.println("x");
+		}
 		msg.setCode(Mc.varnishOrderitem);
 		msg.setAddressee(Id.cEmployeesAgent);
 		request(msg);
@@ -195,6 +199,9 @@ public class WorkshopManager extends OSPABA.Manager
 	public void processTransferCEmployee(MessageForm message)
 	{
 		MyMessage msg = (MyMessage) message.createCopy();
+		if(msg.getOrderItem().getId() == 1062081874){
+			System.out.println("x");
+		}
 		msg.setCode(Mc.transferEmployee);
 		msg.setAddressee(Id.employeeTransferAgent);
 		request(msg);
@@ -230,7 +237,7 @@ public class WorkshopManager extends OSPABA.Manager
 		request(msg);
 	}
 
-	//meta! sender="CEmployeesAgent", id="154", type="Response"
+	//meta! userInfo="Removed from model"
 	public void processStainOrderItem(MessageForm message)
 	{
 	}
@@ -307,10 +314,6 @@ public class WorkshopManager extends OSPABA.Manager
 
 		case Mc.assembleOrderItem:
 			processAssembleOrderItem(message);
-		break;
-
-		case Mc.stainOrderItem:
-			processStainOrderItem(message);
 		break;
 
 		case Mc.workStationAssignment:

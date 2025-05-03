@@ -1,5 +1,6 @@
 package agents.workstationagent;
 
+import java.awt.Point;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -64,6 +65,35 @@ public class WorkStationAgent extends OSPABA.Agent
 	{
 		super.prepareReplication();
 		// Setup component for the next replication
+		MySimulation mySimul = (MySimulation)mySim();
+		
+		waitingOrderItems.clear();
+		assemblyStations.clear();
+		freeAssemblyStations.clear();
+		int sizeOfAssemblyStation = 45;
+		int padding = 25;
+
+		int totalWidth = 0;
+		double startX = 0;
+		double startY = 0;
+		if (mySimul.animatorExists()) {
+			totalWidth = (int)mySimul.getWorkStationNumber() * (sizeOfAssemblyStation + padding) - padding;
+			startX = mySimul.getStorage().getPosition(mySimul.currentTime()).getX() + (mySimul.getStorage().getWidth() - totalWidth) / 2; 
+			startY = mySimul.getStorage().getPosition(mySimul.currentTime()).getX() + mySimul.getStorage().getHeight() + 150;
+		}
+		
+		for(int i = 0; i < mySimul.getWorkStationNumber(); i++)
+		{
+			AssemblyStation a = new AssemblyStation(i);
+			assemblyStations.add(a);
+			freeAssemblyStations.add(a);
+			if (mySimul.animatorExists()) {
+                mySimul.animator().register(a);
+				int posX = (int)startX + i * (sizeOfAssemblyStation + padding);
+				a.setPosition(new Point(posX, (int)startY));
+				
+        	}
+		}
 	}
 
 	//meta! userInfo="Generated code: do not modify", tag="begin"

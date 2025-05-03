@@ -10,7 +10,14 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputFilter.Config;
+import java.nio.Buffer;
 import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
@@ -34,6 +41,8 @@ import Entities.States.Position;
 import OSPABA.ISimDelegate;
 import OSPABA.SimState;
 import OSPABA.Simulation;
+import OSPAnimator.Animator;
+import OSPAnimator.IAnimator;
 import agents.aemployeesagent.AEmployeesAgent;
 import agents.bemployeesagent.BEmployeesAgent;
 import agents.cemployeesagent.CEmployeesAgent;
@@ -78,6 +87,10 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
     private JTable orderStatsJTable;
     private JTable groupStatsJTable;
     private JTable employeeStatsJTable;
+    private JPanel animationJPanel = new javax.swing.JPanel();
+    private IAnimator animPanel;
+    private JCheckBox checkBox = new JCheckBox("Animator");
+    private JFrame frame;
 
     public SimulationGUI() {
         setTitle("Magula Semestralna práca");
@@ -166,9 +179,11 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
         animationPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         JPanel statisticsPanel = new JPanel();
         JScrollPane statisticsScrollPane = new JScrollPane(statisticsPanel);
-        
+
+
         tabbedPane.addTab("Graf", chartPanel);
         tabbedPane.addTab("Animácia", animationPanelScroll);
+        tabbedPane.addTab("Animator", animationJPanel);
         tabbedPane.addTab("Štatistiky", statisticsScrollPane);
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new GridBagLayout());
@@ -176,7 +191,6 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
         gbc.fill = GridBagConstraints.HORIZONTAL; 
         gbc.insets = new Insets(5, 5, 5, 5); 
 
-       
         gbc.gridx = 0;
         gbc.gridy = 0;
         controlPanel.add(repsLabel, gbc);
@@ -213,6 +227,8 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
 
         gbc.gridx = 1;
         controlPanel.add(timeFactorComboBox, gbc);
+        gbc.gridx = 2;
+        controlPanel.add(checkBox, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 3;
@@ -259,7 +275,7 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
         contentPanel.add(ordersScroll);
 
         
-        String[] assemblyColumns = {"ID", "Stav"};
+        String[] assemblyColumns = {"ID", "Vykonávaná činnosť"};
         Object[][] assemblyData = {};
         assemblyStationsTable = new JTable(new DefaultTableModel(assemblyData, assemblyColumns));
         JScrollPane assemblyStationsScroll = new JScrollPane(assemblyStationsTable);
@@ -271,7 +287,7 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
         animationPanel.add(frontsPanel, BorderLayout.NORTH);
 
        
-        JLabel waitingOrderLabel = new JLabel("Objednávky čakajúce na rezanie:");
+        JLabel waitingOrderLabel = new JLabel("Nezačaté objednávky:");
         waitingOrderLabelTextField = new JTextField(10);
         waitingOrderLabelTextField.setEditable(false);
 
@@ -357,7 +373,7 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
         JScrollPane employeeStatScrollPane = new JScrollPane(employeeStatsJTable);
         employeeStatScrollPane.setBorder(BorderFactory.createTitledBorder("Štatistiky zamestnancov"));
         statisticsPanel.add(employeeStatScrollPane);
-
+        animationJPanel.setLayout(new javax.swing.BoxLayout(animationJPanel, javax.swing.BoxLayout.LINE_AXIS));
         setLayout(new BorderLayout());
         add(controlPanel, BorderLayout.NORTH);
         add(tabbedPane, BorderLayout.CENTER);
@@ -394,22 +410,52 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
         stopButton.setEnabled(true);
         dataset.getSeries("Celkový čas spracovania objednávky").clear();
 
-        MySimulation simulation = new MySimulation(aEmployees, bEmployees, cEmployees, assemblyStations);
+        simulation = new MySimulation(aEmployees, bEmployees, cEmployees, assemblyStations);
         if (timeFactorString.equals("MAX rýchlosť")) {
             simulation.setMaxSimSpeed();
         } else{
             Double timeFactor = Double.parseDouble(timeFactorString);
             simulation.setSimSpeed(1, 1/timeFactor);
         }
-        //simulation.setSimSpeed(1, 0.0001);
         simulation.registerDelegate(this);
+        //simulation.setSimSpeed(1, 0.0001);
+        if (checkBox.isSelected()) {
+            Animator animator = new Animator(simulation);
+            animator.setSynchronizedTime(false);
+            simulation.setAnimator(animator);
+            //priadnie animátora do GUI
+            animPanel = simulation.animator();
+            animationJPanel.add(animPanel.canvas());
+            animPanel.canvas().setBackground(Color.lightGray);
+            checkBox.setEnabled(false);
+        }
+        
+        
+        //animPanel.canvas().setBounds(0, 0, 1600, 800); 
+        
+        /* Animator animator = new Animator(simulation);
+        simulation.setAnimator(animator);
+            try {
+                simulation.animator().setBackgroundImage(ImageIO.read(new File("sem3\\src\\main\\java\\img\\background.jpg")));
+            } catch (IOException e) {
+                
+                e.printStackTrace();
+            }
+            frame = new JFrame(); 
+            frame.setBounds(0, 0, 1000, 800); 
+            frame.add(simulation.animator().canvas()); 
+            //pridanie animátora do GUI 
+            frame.setVisible(true); 
+            frame.setLayout(null); 
+         */
         
         //simulation.setSimSpeed(1, 0.005);
             
         Thread thread = new Thread(() -> {
-            simulation.simulate(1, 7171200);
+            simulation.simulate(totalReplications, 7171200);
             enableStartButton();
             disableStopButton();
+            checkBox.setEnabled(true);
         }); 
         thread.start();   
     }  
@@ -433,29 +479,21 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
         simulation.stopSimulation();
         startButton.setEnabled(true);
         stopButton.setEnabled(false);
-    }
-    
-
-    
-    public static void main(String[] args) {
-        try {
-            UIManager.setLookAndFeel(new FlatDarkLaf());
-        } catch (Exception e) {
-            e.printStackTrace();
+        checkBox.setEnabled(true);
+        if (simulation.animatorExists()) {
+            animationJPanel.remove(simulation.animator().canvas()); 
         }
-
-        SwingUtilities.invokeLater(() -> {
-            new SimulationGUI().setVisible(true);
-        });
     }
+    
 
+    
+   
     @Override
     public void refresh(Simulation arg0) {
+        SwingUtilities.invokeLater(() -> {
         simulation = (MySimulation) arg0;
         int replicationsToSkip = (int) (totalReplications * 0.3);
         if (totalReplications > 1) {
-            
-        
             if (simulation.currentReplication() >= replicationsToSkip) {
                 if (totalReplications > points) {
                     if (simulation.currentReplication() % (totalReplications/points) == 0) { 
@@ -476,28 +514,31 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
                 orderStatsModel.setRowCount(0); 
                 orderStatsModel.addRow(new Object[]{"Priemerný čas spracovania objednávky(h)", String.format("%.4f", workshopAgent.getOrderProcessGlobal().mean()/3600), "<" + String.format("%.4f", workshopAgent.getOrderProcessGlobal().confidenceInterval_95()[0]/3600) + ", " + String.format("%.4f", workshopAgent.getOrderProcessGlobal().confidenceInterval_95()[1]/3600) + ">"});
                 orderStatsModel.addRow(new Object[]{"Priemerny pocet cakajucich objednavok:", String.format("%.4f", workshopAgent.getGlobalWaitingOrders().mean()), "<" + String.format("%.4f", workshopAgent.getGlobalWaitingOrders().confidenceInterval_95()[0]) + ", " + String.format("%.4f", workshopAgent.getGlobalWaitingOrders().confidenceInterval_95()[1]) + ">"});
-                /* DefaultTableModel groupWorkStats = (DefaultTableModel) groupStatsJTable.getModel();
+                DefaultTableModel groupWorkStats = (DefaultTableModel) groupStatsJTable.getModel();
                 groupWorkStats.setRowCount(0); 
-                groupWorkStats.addRow(new Object[]{"A", String.format("%.4f", simulation.getWorkloadA().getAverage()), "<" + String.format("%.4f", simulation.getWorkloadA().getConfidenceInterval95()[0]) + ", " + String.format("%.4f", simulation.getWorkloadA().getConfidenceInterval95()[1]) + ">"});
-                groupWorkStats.addRow(new Object[]{"B", String.format("%.4f", simulation.getWorkloadB().getAverage()), "<" + String.format("%.4f", simulation.getWorkloadB().getConfidenceInterval95()[0]) + ", " + String.format("%.4f", simulation.getWorkloadB().getConfidenceInterval95()[1]) + ">"});
-                groupWorkStats.addRow(new Object[]{"C", String.format("%.4f", simulation.getWorkloadC().getAverage()), "<" + String.format("%.4f", simulation.getWorkloadC().getConfidenceInterval95()[0]) + ", " + String.format("%.4f", simulation.getWorkloadC().getConfidenceInterval95()[1]) + ">"});
+                groupWorkStats.addRow(new Object[]{"A", String.format("%.4f", workshopAgent.getGroupAWorkload().mean() * 100), "<" + String.format("%.4f", workshopAgent.getGroupAWorkload().confidenceInterval_95()[0]* 100) + ", " + String.format("%.4f", workshopAgent.getGroupAWorkload().confidenceInterval_95()[1]* 100) + ">"});
+                groupWorkStats.addRow(new Object[]{"B", String.format("%.4f", workshopAgent.getGroupBWorkload().mean()* 100), "<" + String.format("%.4f", workshopAgent.getGroupBWorkload().confidenceInterval_95()[0]* 100) + ", " + String.format("%.4f", workshopAgent.getGroupBWorkload().confidenceInterval_95()[1]* 100) + ">"});
+                groupWorkStats.addRow(new Object[]{"C", String.format("%.4f", workshopAgent.getGroupCWorkload().mean()* 100), "<" + String.format("%.4f", workshopAgent.getGroupCWorkload().confidenceInterval_95()[0]* 100) + ", " + String.format("%.4f", workshopAgent.getGroupCWorkload().confidenceInterval_95()[1]* 100) + ">"});
         
                 
                 DefaultTableModel employyStatsModel = (DefaultTableModel) employeeStatsJTable.getModel();
                 employyStatsModel.setRowCount(0); 
                 int index = 0;
-                for (Employee employee : simulation.getEmployeesA()) {
-                    employyStatsModel.addRow(new Object[]{index, "A", String.format("%.4f", employee.getWorkloadStat().getAverage()), "<" + String.format("%.4f", employee.getWorkloadStat().getConfidenceInterval95()[0]) + ", " + String.format("%.4f", employee.getWorkloadStat().getConfidenceInterval95()[1]) + ">"});
+                AEmployeesAgent aEmployeesAgent = (AEmployeesAgent) simulation.findAgent(Id.aEmployeesAgent);
+                BEmployeesAgent bEmployeesAgent = (BEmployeesAgent) simulation.findAgent(Id.bEmployeesAgent);
+                CEmployeesAgent cEmployeesAgent = (CEmployeesAgent) simulation.findAgent(Id.cEmployeesAgent);
+                for (Employee employee : aEmployeesAgent.getEmployees()) {
+                    employyStatsModel.addRow(new Object[]{index, "A", String.format("%.4f", employee.getGlobalWorkloadStat().mean() * 100), "<" + String.format("%.4f", employee.getGlobalWorkloadStat().confidenceInterval_95()[0]* 100) + ", " + String.format("%.4f", employee.getGlobalWorkloadStat().confidenceInterval_95()[1]* 100) + ">"});
                     index++;
                 }
-                for (Employee employee : simulation.getEmployeesB()) {
-                    employyStatsModel.addRow(new Object[]{index, "B", String.format("%.4f", employee.getWorkloadStat().getAverage()), "<" + String.format("%.4f", employee.getWorkloadStat().getConfidenceInterval95()[0]) + ", " + String.format("%.4f", employee.getWorkloadStat().getConfidenceInterval95()[1]) + ">"}); 
+                for (Employee employee : bEmployeesAgent.getEmployees()) {
+                    employyStatsModel.addRow(new Object[]{index, "B", String.format("%.4f", employee.getGlobalWorkloadStat().mean()* 100), "<" + String.format("%.4f", employee.getGlobalWorkloadStat().confidenceInterval_95()[0]* 100) + ", " + String.format("%.4f", employee.getGlobalWorkloadStat().confidenceInterval_95()[1]* 100) + ">"}); 
                     index++;
                 }
-                for (Employee employee : simulation.getEmployeesC()) {
-                    employyStatsModel.addRow(new Object[]{index, "C", String.format("%.4f", employee.getWorkloadStat().getAverage()), "<" + String.format("%.4f", employee.getWorkloadStat().getConfidenceInterval95()[0]) + ", " + String.format("%.4f", employee.getWorkloadStat().getConfidenceInterval95()[1]) + ">"});
+                for (Employee employee : cEmployeesAgent.getEmployees()) {
+                    employyStatsModel.addRow(new Object[]{index, "C", String.format("%.4f", employee.getGlobalWorkloadStat().mean()* 100), "<" + String.format("%.4f", employee.getGlobalWorkloadStat().confidenceInterval_95()[0]* 100) + ", " + String.format("%.4f", employee.getGlobalWorkloadStat().confidenceInterval_95()[1]* 100) + ">"});
                     index++;
-                } */
+                }
             }
         } else {
             String timeFactorString = (String) timeFactorComboBox.getSelectedItem();
@@ -544,9 +585,11 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
             DefaultTableModel orderTableModel = (DefaultTableModel) ordersTable.getModel();
             orderTableModel.setRowCount(0); 
             SurroundingAgent surroundingAgent = (SurroundingAgent) simulation.findAgent(Id.surroundingAgent);
-            for (Order order : surroundingAgent.getActivOrders()) {
+            for (Order order : new ArrayList<>(surroundingAgent.getActivOrders())) {
+                orderTableModel.addRow(new Object[]{"", "", "", ""});
+                orderTableModel.addRow(new Object[]{order.getId(), "", order.getState(), ""});
                 for (OrderItem orderItem : order.getItems()) {
-                    orderTableModel.addRow(new Object[]{orderItem.getOrder().getId(), orderItem.getItemType(), orderItem.getState(), orderItem.getAssemblyStation() != null ? orderItem.getAssemblyStation().getId() : ""});
+                    orderTableModel.addRow(new Object[]{orderItem.getId(), orderItem.getItemType(), orderItem.getState(), orderItem.getAssemblyStation() != null ? orderItem.getAssemblyStation().getId() : ""});
                 }
             }
 
@@ -557,8 +600,9 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
             for (AssemblyStation station : workStationAgent.getAssemblyStations()) {
                 assemblyTableModel.addRow(new Object[]{station.getId(), station.getCurrentProcess()});
             }
+            WorkshopAgent workshopAgent = (WorkshopAgent) simulation.findAgent(Id.workshopAgent);
             // Aktualizácia frontov
-            waitingOrderLabelTextField.setText(String.valueOf(aEmployeesAgent.getWaitingOrdersCutting().size()));
+            waitingOrderLabelTextField.setText(String.valueOf(workshopAgent.getUnstartedOrders().size()));
             freeALabelLabelTextField.setText(String.valueOf(aEmployeesAgent.getFreeEmployees().size()));
             freeBLabelLabelTextField.setText(String.valueOf(bEmployeesAgent.getFreeEmployees().size()));
             freeCLabelLabelTextField.setText(String.valueOf(cEmployeesAgent.getFreeEmployees().size()));
@@ -575,13 +619,57 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
             orderStatsModel.addRow(new Object[]{"Priemerny pocet cakajucich objednavok:", String.format("%.4f", work.getWaitingOrders().mean()), "N/A" });
             DefaultTableModel groupWorkStats = (DefaultTableModel) groupStatsJTable.getModel();
             groupWorkStats.setRowCount(0); 
+
+            DefaultTableModel employyStatsModel = (DefaultTableModel) employeeStatsJTable.getModel();
+                employyStatsModel.setRowCount(0); 
+                int index = 0;
+                int count = 0;
+                double totalWorkload = 0;
+                for (Employee employee : aEmployeesAgent.getEmployees()) {
+                    totalWorkload += employee.getWorkload();
+                    count++;
+                    employyStatsModel.addRow(new Object[]{index, "A", String.format("%.4f", employee.getWorkload()* 100), "N/A"});
+                    index++;
+                }
+                groupWorkStats.addRow(new Object[]{"A", String.format("%.4f", (totalWorkload/count)*100), "N/A"});
+                count = 0;
+                totalWorkload = 0;
+                for (Employee employee : bEmployeesAgent.getEmployees()) {
+                    employyStatsModel.addRow(new Object[]{index, "B", String.format("%.4f", employee.getWorkload()* 100), "N/A"});
+                    totalWorkload += employee.getWorkload();
+                    count++;
+                    index++;
+                }
+                groupWorkStats.addRow(new Object[]{"B", String.format("%.4f", (totalWorkload/count)*100), "N/A"});
+                count = 0;
+                totalWorkload = 0;
+                for (Employee employee : cEmployeesAgent.getEmployees()) {
+                    totalWorkload += employee.getWorkload();
+                    count++;
+                    employyStatsModel.addRow(new Object[]{index, "C", String.format("%.4f", employee.getWorkload()* 100), "N/A"});
+                    index++;
+                }
+                groupWorkStats.addRow(new Object[]{"C", String.format("%.4f", (totalWorkload/count)*100), "N/A"});
         }
+    });
     }       
     
 
     @Override
     public void simStateChanged(Simulation arg0, SimState arg1) {
-        System.out.println("1");
     }
+    public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(new FlatDarkLaf());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        SwingUtilities.invokeLater(() -> {
+            new SimulationGUI().setVisible(true);
+        });
+    }
+
 }
+
 

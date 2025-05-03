@@ -13,15 +13,19 @@ import OSPRNG.UniformContinuousRNG;
 //meta! id="167"
 public class StainProcess extends OSPABA.Process
 {
-	private  EmpiricRNG tableStainTime = new EmpiricRNG(new EmpiricPair(
-			new UniformContinuousRNG(3000d, 4200d), 0.1),
-			new EmpiricPair(new UniformContinuousRNG(4200d, 9000d), 0.6),
-			new EmpiricPair(new UniformContinuousRNG(9000d, 12000d), 0.3));
-	private  UniformContinuousRNG chairStainTime = new UniformContinuousRNG(2400d, 12000d);
-	private  UniformContinuousRNG wardrobeStainTime = new UniformContinuousRNG(15000d, 33600d);
+	private  EmpiricRNG tableStainTime ;
+	private  UniformContinuousRNG chairStainTime ;
+	private  UniformContinuousRNG wardrobeStainTime ;
 	public StainProcess(int id, Simulation mySim, CommonAgent myAgent)
 	{
 		super(id, mySim, myAgent);
+		MySimulation simulation = (MySimulation) mySim;
+		tableStainTime = new EmpiricRNG(/* simulation.seedGenerator, */new EmpiricPair( 
+			new UniformContinuousRNG(3000d, 4200d), 0.1),
+			new EmpiricPair(new UniformContinuousRNG(4200d, 9000d), 0.6),
+			new EmpiricPair(new UniformContinuousRNG(9000d, 12000d), 0.3));
+	chairStainTime = new UniformContinuousRNG(2400d, 12000d/* ,simulation.seedGenerator */);
+	wardrobeStainTime = new UniformContinuousRNG(15000d, 33600d/* ,simulation.seedGenerator */);
 	}
 
 	@Override
@@ -34,11 +38,11 @@ public class StainProcess extends OSPABA.Process
 	//meta! sender="CEmployeesAgent", id="168", type="Start"
 	public void processStart(MessageForm message)
 	{
-		MyMessage myMessage = (MyMessage) message;
+		MyMessage myMessage = (MyMessage) message.createCopy();
 		myMessage.getEmployee().setState(EmployeeState.STAINING);
 		myMessage.getAssemblyStation().setCurrentProcess(Process.STAINING);
 		myMessage.getOrderItem().setState(OrderItemState.BEING_STAINED);
-		myMessage.setCode(Mc.stainOrderItem);
+		myMessage.setCode(Mc.varnishOrderitem);
 		switch (myMessage.getOrderItem().getItemType()) {
 			case CHAIR:
 				hold(chairStainTime.sample(), myMessage);
@@ -59,8 +63,8 @@ public class StainProcess extends OSPABA.Process
 	{
 		switch (message.code())
 		{
-			case Mc.stainOrderItem:
-				MyMessage myMessage = (MyMessage) message;
+			case Mc.varnishOrderitem:
+				MyMessage myMessage = (MyMessage) message.createCopy();
 				myMessage.getEmployee().setState(EmployeeState.IDLE);
 				myMessage.getOrderItem().setState(OrderItemState.STAINED);
 				myMessage.setCode(Mc.finish);

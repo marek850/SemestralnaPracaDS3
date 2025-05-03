@@ -3,6 +3,7 @@ package agents.workstationagent;
 import Entities.Order;
 import Entities.OrderItem;
 import OSPABA.*;
+import agents.workshopagent.WorkshopAgent;
 import simulation.*;
 
 //meta! id="10"
@@ -30,6 +31,9 @@ public class WorkStationManager extends OSPABA.Manager
 	public void processWorkStationAssignment(MessageForm message)
 	{
 		MyMessage msg = (MyMessage) message.createCopy();
+		if(msg.getOrderItem().getId() == 1062081874){
+			System.out.println("x");
+		}
 		if (myAgent().isFree()) {
 			msg.setAssemblyStation(myAgent().assignAssemblyStation());
 			msg.getOrderItem().setAssemblyStation(msg.getAssemblyStation());
@@ -42,7 +46,7 @@ public class WorkStationManager extends OSPABA.Manager
 	//meta! sender="WorkshopAgent", id="42", type="Notice"
 	public void processWorkStationRelease(MessageForm message)
 	{
-		MyMessage msg = (MyMessage) message;
+		MyMessage msg = (MyMessage) message.createCopy();
 		
 		if (!myAgent().getWaitingOrderItems().isEmpty()) {
 			MyMessage waitingMsg = myAgent().getWaitingOrderItem();

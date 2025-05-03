@@ -11,12 +11,16 @@ import OSPRNG.UniformContinuousRNG;
 //meta! id="164"
 public class AssembleProcess extends OSPABA.Process
 {
-	private  UniformContinuousRNG tableAssembleTime = new UniformContinuousRNG(1800d, 3600d);
-	private  UniformContinuousRNG chairAssembleTime = new UniformContinuousRNG(840d, 1440d);
-	private  UniformContinuousRNG wardronbeAssembleTime = new UniformContinuousRNG(2100d, 4500d);
+	private  UniformContinuousRNG tableAssembleTime ;
+	private  UniformContinuousRNG chairAssembleTime ;
+	private  UniformContinuousRNG wardronbeAssembleTime ;
 	public AssembleProcess(int id, Simulation mySim, CommonAgent myAgent)
 	{
 		super(id, mySim, myAgent);
+		MySimulation simulation = (MySimulation) mySim;
+		tableAssembleTime = new UniformContinuousRNG(1800d, 3600d/* , simulation.seedGenerator */);
+		chairAssembleTime = new UniformContinuousRNG(840d, 1440d/* ,simulation.seedGenerator */);
+		wardronbeAssembleTime = new UniformContinuousRNG(2100d, 4500d/* ,simulation.seedGenerator */);
 	}
 
 	@Override
@@ -29,7 +33,7 @@ public class AssembleProcess extends OSPABA.Process
 	//meta! sender="BEmployeesAgent", id="165", type="Start"
 	public void processStart(MessageForm message)
 	{
-		MyMessage myMessage = (MyMessage) message;
+		MyMessage myMessage = (MyMessage) message.createCopy();
 		myMessage.getEmployee().setState(EmployeeState.ASSEMBLING);
 		myMessage.getAssemblyStation().setCurrentProcess(Process.ASSEMBLING);
 		myMessage.getOrderItem().setState(OrderItemState.BEING_ASSEMBLED);

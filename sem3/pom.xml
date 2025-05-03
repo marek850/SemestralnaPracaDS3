@@ -7,7 +7,14 @@
     <groupId>com.sem3</groupId>
     <artifactId>sem3</artifactId>
     <version>1.0-SNAPSHOT</version>
-
+    <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>*/</include>
+                </includes>
+            </resource>
+    </resources>
     <properties>
         <maven.compiler.source>24</maven.compiler.source>
         <maven.compiler.target>24</maven.compiler.target>

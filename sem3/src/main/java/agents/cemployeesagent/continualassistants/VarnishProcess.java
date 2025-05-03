@@ -11,12 +11,16 @@ import OSPRNG.UniformContinuousRNG;
 //meta! id="169"
 public class VarnishProcess extends OSPABA.Process
 {
-	private  UniformContinuousRNG tableVarnishTime = new UniformContinuousRNG(6000d, 28800d);
-	private  UniformContinuousRNG chairVarnishTime = new UniformContinuousRNG(5400d, 24000d);
-	private  UniformContinuousRNG wardrobeVarnishTime = new UniformContinuousRNG(18000d, 36000d);
+	private  UniformContinuousRNG tableVarnishTime;
+	private  UniformContinuousRNG chairVarnishTime;
+	private  UniformContinuousRNG wardrobeVarnishTime;
 	public VarnishProcess(int id, Simulation mySim, CommonAgent myAgent)
 	{
 		super(id, mySim, myAgent);
+		MySimulation simulation = (MySimulation) mySim;
+		tableVarnishTime = new UniformContinuousRNG(6000d, 28800d/* , simulation.seedGenerator */);
+		chairVarnishTime = new UniformContinuousRNG(5400d, 24000d/* , simulation.seedGenerator */);
+		wardrobeVarnishTime = new UniformContinuousRNG(18000d, 36000d/* , simulation.seedGenerator */);
 	}
 
 	@Override
@@ -29,7 +33,7 @@ public class VarnishProcess extends OSPABA.Process
 	//meta! sender="CEmployeesAgent", id="170", type="Start"
 	public void processStart(MessageForm message)
 	{
-		MyMessage myMessage = (MyMessage) message;
+		MyMessage myMessage = (MyMessage) message.createCopy();
 		myMessage.getEmployee().setState(EmployeeState.VARNISHING);
 		myMessage.getAssemblyStation().setCurrentProcess(Process.VARNISHING);
 		myMessage.getOrderItem().setState(OrderItemState.BEING_VARNISHED);
@@ -55,7 +59,7 @@ public class VarnishProcess extends OSPABA.Process
 		switch (message.code())
 		{
 			case Mc.varnishOrderitem:
-				MyMessage myMessage = (MyMessage) message;
+				MyMessage myMessage = (MyMessage) message.createCopy();
 				myMessage.getEmployee().setState(EmployeeState.IDLE);
 				myMessage.getOrderItem().setState(OrderItemState.VARNISHED);
 				myMessage.setCode(Mc.finish);

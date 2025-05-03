@@ -7,21 +7,24 @@ import simulation.*;
 import agents.aemployeesagent.*;
 import OSPABA.Process;
 import OSPRNG.TriangularRNG;
+import UserInterface.AnimatorConfig;
 
 //meta! id="181"
 public class MaterialPrepareProcess extends OSPABA.Process
 {
-	private TriangularRNG prepareTimeGenerator = new TriangularRNG(300d, 500d, 900d);
+	private TriangularRNG prepareTimeGenerator ;
 	public MaterialPrepareProcess(int id, Simulation mySim, CommonAgent myAgent)
 	{
 		super(id, mySim, myAgent);
+		MySimulation simulation = (MySimulation) mySim;
+		prepareTimeGenerator = new TriangularRNG(300d, 500d, 900d/* , simulation.seedGenerator */);
 	}
 
 	@Override
 	public void prepareReplication()
 	{
 		super.prepareReplication();
-		// Setup component for the next replication
+		
 	}
 
 	//meta! sender="AEmployeesAgent", id="182", type="Start"
@@ -42,6 +45,7 @@ public class MaterialPrepareProcess extends OSPABA.Process
 			case Mc.cutOrderItem:
 				MyMessage myMessage = (MyMessage) message;
 				myMessage.getOrderItem().setState(OrderItemState.MATERIAL_PREPARED);
+				myMessage.getEmployee().setImage(AnimatorConfig.EMPLOYEE_WOOD);
 				message.setCode(Mc.finish);
 				myMessage.setAddressee(myAgent());
 				notice(myMessage);

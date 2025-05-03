@@ -1,11 +1,17 @@
 package agents.cemployeesagent;
 
+import java.awt.geom.Point2D;
+
+import Entities.AssemblyStation;
 import Entities.Employee;
 import Entities.States.EmployeeState;
 import Entities.States.FurnitureType;
 import Entities.States.OrderItemState;
 import Entities.States.Position;
+import Entities.States.Process;
 import OSPABA.*;
+import OSPAnimator.AnimImageItem;
+import UserInterface.AnimatorConfig;
 import simulation.*;
 
 //meta! id="8"
@@ -40,7 +46,7 @@ public class CEmployeesManager extends OSPABA.Manager
 	//meta! sender="WorkshopAgent", id="160", type="Response"
 	public void processTransferCEmployee(MessageForm message)
 	{
-		MyMessage msg = (MyMessage) message;
+		MyMessage msg = (MyMessage) message.createCopy();
 		if (msg.getOrderItem().getState() == OrderItemState.CUT || msg.getOrderItem().getState() == OrderItemState.WAITING_FOR_VARNISH) {
 			msg.setCode(Mc.varnishOrderitem);
 			msg.setAddressee(myAgent().findAssistant(Id.varnishProcess));
@@ -64,14 +70,27 @@ public class CEmployeesManager extends OSPABA.Manager
 	public void processVarnishOrderitem(MessageForm message)
 	{
 		MyMessage msg = (MyMessage)message.createCopy();
+		if(msg.getOrderItem().getId() == 1062081874){
+			System.out.println("x");
+		}
 		if (myAgent().getFreeEmployees().isEmpty()) {
 			msg.getOrderItem().setState(OrderItemState.WAITING_FOR_VARNISH);
 			myAgent().addWaitingOrderVarnish(msg);
 		} else{
 			msg.setEmployee(myAgent().assignEmployee());
+			msg.getEmployee().getWorkloadStat().addSample(1d);
 			if (msg.getEmployee().getCurrentPosition() == Position.ASSEMBLY_STATION &&
 					msg.getEmployee().getStation() == msg.getAssemblyStation()) {
-
+					if (mySim().animatorExists()) {
+						Employee employee = msg.getEmployee();
+						Point2D target = new Point2D.Double(msg.getAssemblyStation().getPosition(mySim().currentTime()).getX() - 30,msg.getAssemblyStation().getPosition(mySim().currentTime()).getY());
+						Point2D[] path = new Point2D[] {
+							new Point2D.Double(employee.getPosition(mySim().currentTime()).getX(), employee.getPosition(mySim().currentTime()).getY()),       // výstup
+							new Point2D.Double(target.getX(), employee.getPosition(mySim().currentTime()).getY()),      // horizontálny presun
+							target                                                     // zostup
+						};
+						employee.startAnim(mySim().currentTime(), 3, path);
+					}
 					msg.setAddressee(myAgent().findAssistant(Id.varnishProcess));
 					startContinualAssistant(msg);
 			} else{
@@ -93,9 +112,20 @@ public class CEmployeesManager extends OSPABA.Manager
 		} else{
 			//ak je volny zamestnanec tak skontrolujem ci ho treba presunut
 			msg.setEmployee(myAgent().assignEmployee());
+			msg.getEmployee().getWorkloadStat().addSample(1d);
 			if(msg.getEmployee().getCurrentPosition() == Position.ASSEMBLY_STATION && msg.getEmployee().getStation() == msg.getAssemblyStation()) {
 				//ak je uz na montaznom mieste tak zacne s montazou
 				msg.setCode(Mc.cFitHardwareOnItem);
+				if (mySim().animatorExists()) {
+					Employee employee = msg.getEmployee();
+					Point2D target = new Point2D.Double(msg.getAssemblyStation().getPosition(mySim().currentTime()).getX() - 30,msg.getAssemblyStation().getPosition(mySim().currentTime()).getY());
+					Point2D[] path = new Point2D[] {
+						new Point2D.Double(employee.getPosition(mySim().currentTime()).getX(), employee.getPosition(mySim().currentTime()).getY()),       // výstup
+						new Point2D.Double(target.getX(), employee.getPosition(mySim().currentTime()).getY()),      // horizontálny presun
+						target                                                     // zostup
+					};
+					employee.startAnim(mySim().currentTime(), 3, path);
+				}
 				msg.setAddressee(myAgent().findAssistant(Id.cFitHardwareProcess));
 				startContinualAssistant(msg);
 			}else {
@@ -112,6 +142,7 @@ public class CEmployeesManager extends OSPABA.Manager
 	public void processFinishVarnishProcess(MessageForm message)
 	{
 		MyMessage msg = (MyMessage) message.createCopy();
+		msg.getAssemblyStation().setCurrentProcess(Process.NONE);
 		if(msg.getOrderItem().isStain()){
 			msg.setAddressee(myAgent().findAssistant(Id.stainProcess));
 			startContinualAssistant(msg);
@@ -131,6 +162,7 @@ public class CEmployeesManager extends OSPABA.Manager
 	public void processFinishStainProcess(MessageForm message)
 	{
 		MyMessage msg = (MyMessage) message.createCopy();
+		msg.getAssemblyStation().setCurrentProcess(Process.NONE);
 		Employee finishedEmployee = msg.getEmployee();
 		handleFinishedEmployee(finishedEmployee);
 		if(msg.getOrderItem().getItemType() == FurnitureType.WARDROBE) {
@@ -159,26 +191,53 @@ public class CEmployeesManager extends OSPABA.Manager
 		} else {
 			//ak necaka ziadna objednavka
 			finishedEmployee.setState(EmployeeState.IDLE);
+			finishedEmployee.getWorkloadStat().addSample(0d);
+			if(mySim().animatorExists()){
+				AssemblyStation station = finishedEmployee.getStation();
+				Point2D startQueue = new Point2D.Double(station.getPosition(mySim().currentTime()).getX(), station.getPosition(mySim().currentTime()).getY() + 40);
+				station.setStartPositionOfQueue(startQueue);
+				moveEmployeeToFinishedQueue(finishedEmployee, station, mySim().currentTime());
+			}
+			
 			myAgent().releaseEmployee(finishedEmployee);
 		}
 
 	}
+	public void moveEmployeeToFinishedQueue(AnimImageItem employee, 
+                                               AssemblyStation station,
+                                               double simTime) {
+		Point2D start = employee.getPosition(simTime);
+		Point2D target = station.getNextFinishedPosition();
 
+		// Cesta: vystúpi hore, presunie sa horizontálne, potom zostúpi na pozíciu
+		Point2D[] path = new Point2D[] {
+			new Point2D.Double(start.getX(), start.getY()),
+			new Point2D.Double(start.getX(), target.getY()),
+			target
+		};
+
+		employee.startAnim(simTime, 3, path);
+		employee.setZIndex(station.getFinishedCount());
+		station.incrementFinishedCount();
+	}
 	//meta! sender="CFitHardwareProcess", id="172", type="Finish"
 	public void processFinishCFitHardwareProcess(MessageForm message)
 	{
 		MyMessage msg = (MyMessage) message.createCopy();
+		msg.getAssemblyStation().setCurrentProcess(Process.NONE);
 		Employee finishedEmployee = msg.getEmployee();
 		handleFinishedEmployee(finishedEmployee);
+		msg.getAssemblyStation().setImage(AnimatorConfig.ASSEMBLY_STATION);
 		msg.setEmployee(null);
 		msg.setCode(Mc.cFitHardwareOnItem);
 		response(msg);
 
 	}
 
-	//meta! sender="WorkshopAgent", id="154", type="Request"
+	//meta! userInfo="Removed from model"
 	public void processStainOrderItem(MessageForm message)
 	{
+		
 	}
 
 	//meta! sender="WorkshopAgent", id="178", type="Request"
@@ -199,10 +258,6 @@ public class CEmployeesManager extends OSPABA.Manager
 	{
 		switch (message.code())
 		{
-		case Mc.stainOrderItem:
-			processStainOrderItem(message);
-		break;
-
 		case Mc.transferCEmployee:
 			processTransferCEmployee(message);
 		break;

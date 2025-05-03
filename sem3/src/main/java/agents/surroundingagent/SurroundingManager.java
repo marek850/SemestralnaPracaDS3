@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import com.sem3.Entities.States.OrderState;
+import Entities.States.OrderState;
 
 import Entities.Order;
 import Entities.OrderItem;

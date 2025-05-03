@@ -1,5 +1,6 @@
 package agents.cemployeesagent;
 
+import java.awt.Point;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -31,7 +32,7 @@ public class CEmployeesAgent extends OSPABA.Agent
 		waitingOrdersVarnish = new LinkedList<MyMessage>();
 		waitingOrdersHardwareFit = new LinkedList<MyMessage>();
 		for (int i = 0; i < sim.getcEmpNumber(); i++) {
-			employees.add(new Employee(i, EmployeeType.C));
+			employees.add(new Employee(i, EmployeeType.C, mySim));
 			Employee employee = employees.get(i);
 			employee.setPosition(Position.STORAGE);
 			freeEmployees.add(employee);
@@ -83,6 +84,34 @@ public class CEmployeesAgent extends OSPABA.Agent
 	{
 		super.prepareReplication();
 		// Setup component for the next replication
+		freeEmployees.clear();
+		waitingOrdersVarnish.clear();
+		waitingOrdersHardwareFit.clear();
+		MySimulation sim = (MySimulation) mySim();
+		int employeeSize = 36;
+		int padding = 6;
+		int rowPadding = 10;
+		double startX = 0;
+		double startY = 0;
+		if (sim.animatorExists()) {
+			startX =  sim.getStorage().getPosition(sim.currentTime()).getX() + padding;
+			startY = sim.getStorage().getPosition(sim.currentTime()).getY() + rowPadding;
+		}
+		
+		int index = 0;
+		for(Employee employee : employees) {
+			employee.reset();
+			freeEmployees.add(employee);
+			if (mySim().animatorExists()) {
+                mySim().animator().register(employee);
+				int x = (int)(startX + index * (employeeSize + padding));
+				int y = (int)(startY + 2 * (employeeSize + rowPadding));
+                employee.setPosition(new Point(x, y));
+				employee.setDefaultStoragePosX(x);
+				employee.setDefaultStoragePosY(y);
+				index++;
+        	}
+		}
 	}
 
 	//meta! userInfo="Generated code: do not modify", tag="begin"
@@ -96,7 +125,6 @@ public class CEmployeesAgent extends OSPABA.Agent
 		addOwnMessage(Mc.requestCWaitingOrders);
 		addOwnMessage(Mc.varnishOrderitem);
 		addOwnMessage(Mc.cFitHardwareOnItem);
-		addOwnMessage(Mc.stainOrderItem);
 		addOwnMessage(Mc.requestNumOfFreeEmpC);
 	}
 	//meta! tag="end"

@@ -36,23 +36,23 @@ public class MyMessage extends OSPABA.MessageForm
 	public void setOrder(Order order) {
 		this.order = order;
 	}
-	private double hardwareFitTIme = 0;
+	private double hardwareFitTIme;
 	public double getHardwareFitTIme() {
 		return hardwareFitTIme;
 	}
 	public void setHardwareFitTIme(double hardwareFitTIme) {
 		this.hardwareFitTIme = hardwareFitTIme;
 	}
-	private int aEmployeesNumber = 0;
-	private int cEmployeesNumber = 0;
-	private int aWaitingOrders = 0;
+	private int aEmployeesNumber;
+	private int cEmployeesNumber;
+	private int aWaitingOrders;
 	public int getAWaitingOrders() {
 		return aWaitingOrders;
 	}
 	public void setAWaitingOrders(int aWaitingOrders) {
 		this.aWaitingOrders = aWaitingOrders;
 	}
-	private int cWaitingOrders = 0;
+	private int cWaitingOrders;
 	public int getCWaitingOrders() {
 		return cWaitingOrders;
 	}
@@ -97,5 +97,10 @@ public class MyMessage extends OSPABA.MessageForm
 		this.orderItem = original.orderItem;
 		this.employee = original.employee;
 		this.assemblyStation = original.assemblyStation;
+		this.hardwareFitTIme = original.hardwareFitTIme;
+		this.aEmployeesNumber = original.aEmployeesNumber;
+		this.cEmployeesNumber = original.cEmployeesNumber;
+		this.aWaitingOrders = original.aWaitingOrders;
+		this.cWaitingOrders = original.cWaitingOrders;
 	}
 }

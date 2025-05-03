@@ -1,5 +1,6 @@
 package agents.bemployeesagent;
 
+import java.awt.Point;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -26,8 +27,8 @@ public class BEmployeesAgent extends OSPABA.Agent
 		employees = new LinkedList<Employee>();
 		freeEmployees = new LinkedList<Employee>();
 		waitingOrdersAssemble = new LinkedList<MyMessage>();
-		for (int i = 0; i < sim.getcEmpNumber(); i++) {
-			employees.add(new Employee(i, EmployeeType.B));
+		for (int i = 0; i < sim.getbEmpNumber(); i++) {
+			employees.add(new Employee(i, EmployeeType.B, mySim));
 			Employee employee = employees.get(i);
 			employee.setPosition(Position.STORAGE);
 			freeEmployees.add(employee);
@@ -66,6 +67,33 @@ public class BEmployeesAgent extends OSPABA.Agent
 	{
 		super.prepareReplication();
 		// Setup component for the next replication
+		waitingOrdersAssemble.clear();
+		freeEmployees.clear();
+		MySimulation sim = (MySimulation) mySim();
+		int employeeSize = 36;
+		int padding = 6;
+		int rowPadding = 10;
+		double startX = 0;
+		double startY = 0;
+		if (sim.animatorExists()) {
+			 startX =  sim.getStorage().getPosition(sim.currentTime()).getX() + padding;
+			 startY = sim.getStorage().getPosition(sim.currentTime()).getY() + rowPadding;
+		}
+		
+		int index = 0;
+		for(Employee employee : employees) {
+			employee.reset();
+			freeEmployees.add(employee);
+			if (mySim().animatorExists()) {
+                mySim().animator().register(employee);
+				int x = (int)(startX + index * (employeeSize + padding));
+				int y = (int)(startY + 1 * (employeeSize + rowPadding));
+                employee.setPosition(new Point(x, y));
+				employee.setDefaultStoragePosX(x);
+				employee.setDefaultStoragePosY(y);
+				index++;
+        	}
+		}
 	}
 
 	//meta! userInfo="Generated code: do not modify", tag="begin"

@@ -3,9 +3,17 @@ package Entities;
 import Entities.States.EmployeeState;
 import Entities.States.EmployeeType;
 import Entities.States.Position;
+import OSPABA.Simulation;
+import OSPAnimator.AnimImageItem;
+import OSPStat.Stat;
+import OSPStat.WStat;
+import UserInterface.AnimatorConfig;
+
+import java.io.ObjectInputFilter.Config;
+
 import com.sem3.Statistics.Statistic;
 
-public class Employee {
+public class Employee extends AnimImageItem{
     private EmployeeState state;
     private int id;
     private OrderItem currentOrderItem;
@@ -14,31 +22,70 @@ public class Employee {
     private AssemblyStation station;
     private double notWorkingTime;
     private boolean isWorking;
+    private WStat workloadStat;
+    private double defaultStoragePosX;
+    public double getDefaultStoragePosX() {
+        return defaultStoragePosX;
+    }
+
+    public void setDefaultStoragePosX(double defaultStoragePosX) {
+        this.defaultStoragePosX = defaultStoragePosX;
+    }
+    private double defaultStoragePosY;
+
+    
+    public double getDefaultStoragePosY() {
+        return defaultStoragePosY;
+    }
+
+    public void setDefaultStoragePosY(double defaultStoragePosY) {
+        this.defaultStoragePosY = defaultStoragePosY;
+    }
+
+    public WStat getWorkloadStat() {
+        return workloadStat;
+    }
+    private Stat overallWorkloadStat;
     
 
-    private Statistic workloadStat;
+    public Stat getGlobalWorkloadStat() {
+        return overallWorkloadStat;
+    }
 	
-    public Employee(int id, EmployeeType type) {
+    public Employee(int id, EmployeeType type, Simulation simulation) {
+        super(AnimatorConfig.EMPLOYEE, 36, 36);
         this.type = type;
         this.state = EmployeeState.IDLE;
         this.position = Position.STORAGE;
+        setZIndex(1);
+        switch (type) {
+            case A:
+                setImage(AnimatorConfig.EMPLOYEE);
+                break;
+            case B:
+                setImage(AnimatorConfig.EMPLOYEEB);
+                break;
+            case C:
+                setImage(AnimatorConfig.EMPLOYEEC);
+                break;
+            default:
+        }
         this.station = null;
         this.id = id;
         this.isWorking = false;
         lastTimeChange = -1;
-        this.workloadStat = new Statistic();
+        this.workloadStat = new WStat(simulation);
+        this.overallWorkloadStat = new Stat();
     }
     public OrderItem getCurrentOrderItem() {
         return currentOrderItem;
     }
+
     public void setCurrentOrderItem(OrderItem currentOrderItem) {
         this.currentOrderItem = currentOrderItem;
     }
     public boolean isWorking() {
 		return isWorking;
-	}
-    public Statistic getWorkloadStat() {
-		return workloadStat;
 	}
 	public void setWorking(boolean isWorking, double time) {
         if (!isWorking() && isWorking) {
@@ -82,6 +129,7 @@ public class Employee {
         this.isWorking = false;
         lastTimeChange = -1;
         this.notWorkingTime = 0;
+        workloadStat.clear();
     }
     public EmployeeType getType() {
         return type;
@@ -99,11 +147,7 @@ public class Employee {
         
         this.state = state;
     }
-    public double getWorkload(double time) {
-        if (notWorkingTime == 0) {
-            return 0;
-        } else {
-            return ((time - notWorkingTime) / time) * 100;
-        }
+    public double getWorkload() {
+        return workloadStat.mean();
     }
 }

@@ -1,6 +1,12 @@
 package simulation;
 
+import java.awt.Color;
+import java.util.Random;
+
+import Entities.Employee;
 import OSPABA.*;
+import OSPAnimator.AnimShape;
+import OSPAnimator.AnimShapeItem;
 import agents.bemployeesagent.*;
 import agents.modelagent.*;
 import agents.surroundingagent.*;
@@ -14,7 +20,13 @@ import agents.employeetransferagent.*;
 
 public class MySimulation extends OSPABA.Simulation
 {
+	public long seed = 412/* new Random().nextInt(1000) */;
+	public Random seedGenerator = new Random(seed);
 	private int aEmpNumber;
+	private AnimShapeItem storage;
+	public AnimShapeItem getStorage() {
+		return storage;
+	}
 	public int getaEmpNumber() {
 		return aEmpNumber;
 	}
@@ -36,18 +48,33 @@ public class MySimulation extends OSPABA.Simulation
 
 	public MySimulation(int aEmpNumber, int bEmpNumber, int cEmpNumber, int workStationNumber)
 	{
-		
+		super();
 		this.aEmpNumber = aEmpNumber;
 		this.bEmpNumber = bEmpNumber;
 		this.cEmpNumber = cEmpNumber;
 		this.workStationNumber = workStationNumber;
 		init();
+		AEmployeesAgent aEmployeesAgent = (AEmployeesAgent) findAgent(Id.aEmployeesAgent);
+		BEmployeesAgent bEmployeesAgent = (BEmployeesAgent) findAgent(Id.bEmployeesAgent);
+		CEmployeesAgent cEmployeesAgent = (CEmployeesAgent) findAgent(Id.cEmployeesAgent);
+		int width = Math.max(aEmployeesAgent.getEmployees().size(), Math.max(bEmployeesAgent.getEmployees().size(), cEmployeesAgent.getEmployees().size())) * 42; 
+		int height = (36 + 10) * 3 + 20;
+		
+			storage = new AnimShapeItem(AnimShape.RECTANGLE, width, height);
+			storage.setZIndex(0);
+			storage.setColor(Color.GRAY);
+			storage.setPosition(100, 100); 
+			storage.setFill(true);
+		
+		
+		
 	}
 
 	@Override
 	public void prepareSimulation()
 	{
 		super.prepareSimulation();
+		System.out.println(seed);
 		// Create global statistcis
 	}
 
@@ -55,7 +82,24 @@ public class MySimulation extends OSPABA.Simulation
 	public void prepareReplication()
 	{
 		super.prepareReplication();
-		// Reset entities, queues, local statistics, etc...
+		/* if (animatorExists()) { */
+			AEmployeesAgent aEmployeesAgent = (AEmployeesAgent) findAgent(Id.aEmployeesAgent);
+			BEmployeesAgent bEmployeesAgent = (BEmployeesAgent) findAgent(Id.bEmployeesAgent);
+			CEmployeesAgent cEmployeesAgent = (CEmployeesAgent) findAgent(Id.cEmployeesAgent);
+			int width = Math.max(aEmployeesAgent.getEmployees().size(), Math.max(bEmployeesAgent.getEmployees().size(), cEmployeesAgent.getEmployees().size())) * 42; 
+			int height = (36 + 10) * 3 + 20;
+
+			storage = new AnimShapeItem(AnimShape.RECTANGLE, width, height);
+			if (animatorExists()) {
+			animator().register(storage);
+			storage.setZIndex(0);
+			storage.setColor(Color.GRAY);
+			storage.setPosition(100, 100); 
+			storage.setFill(true);
+			}
+			
+
+		/* } */
 	}
 
 	@Override
@@ -63,9 +107,26 @@ public class MySimulation extends OSPABA.Simulation
 	{
 		// Collect local statistics into global, update UI, etc...
 		super.replicationFinished();
-		System.out.println("Replication finished");
+		AEmployeesAgent aEmployeesAgent = (AEmployeesAgent) findAgent(Id.aEmployeesAgent);
+		BEmployeesAgent bEmployeesAgent = (BEmployeesAgent) findAgent(Id.bEmployeesAgent);
+		CEmployeesAgent cEmployeesAgent = (CEmployeesAgent) findAgent(Id.cEmployeesAgent);
+		for (Employee employee : aEmployeesAgent.getEmployees()) {
+			employee.getWorkloadStat().addSample(0d);
+		}
+		for (Employee employee : bEmployeesAgent.getEmployees()) {
+			employee.getWorkloadStat().addSample(0d);
+		}
+		for (Employee employee : cEmployeesAgent.getEmployees()) {
+			employee.getWorkloadStat().addSample(0d);
+		}
 		WorkshopAgent workshopAgent = (WorkshopAgent) findAgent(Id.workshopAgent);
-		System.out.println("Cas:" + workshopAgent.getOrderProcessingTimeStat().mean() / 3600);
+		workshopAgent.afterReplicationWorkloadUpdate();
+
+		
+		
+		for(ISimDelegate simDelegate : this.delegates()) {
+			simDelegate.refresh(this);
+		}
 	}
 
 	@Override
@@ -73,7 +134,9 @@ public class MySimulation extends OSPABA.Simulation
 	{
 		// Display simulation results
 		super.simulationFinished();
-		System.out.println("Simulation finished");
+		for(ISimDelegate simDelegate : this.delegates()) {
+			simDelegate.refresh(this);
+		}
 	}
 
 	//meta! userInfo="Generated code: do not modify", tag="begin"
