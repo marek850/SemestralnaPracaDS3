@@ -187,9 +187,6 @@ public class WorkshopManager extends OSPABA.Manager
 	public void processCutOrderItem(MessageForm message)
 	{
 		MyMessage msg = (MyMessage) message.createCopy();
-		if(msg.getOrderItem().getId() == 1062081874){
-			System.out.println("x");
-		}
 		msg.setCode(Mc.varnishOrderitem);
 		msg.setAddressee(Id.cEmployeesAgent);
 		request(msg);
@@ -199,9 +196,6 @@ public class WorkshopManager extends OSPABA.Manager
 	public void processTransferCEmployee(MessageForm message)
 	{
 		MyMessage msg = (MyMessage) message.createCopy();
-		if(msg.getOrderItem().getId() == 1062081874){
-			System.out.println("x");
-		}
 		msg.setCode(Mc.transferEmployee);
 		msg.setAddressee(Id.employeeTransferAgent);
 		request(msg);

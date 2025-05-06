@@ -9,10 +9,6 @@ import OSPStat.Stat;
 import OSPStat.WStat;
 import UserInterface.AnimatorConfig;
 
-import java.io.ObjectInputFilter.Config;
-
-import com.sem3.Statistics.Statistic;
-
 public class Employee extends AnimImageItem{
     private EmployeeState state;
     private int id;
@@ -61,12 +57,15 @@ public class Employee extends AnimImageItem{
         switch (type) {
             case A:
                 setImage(AnimatorConfig.EMPLOYEE);
+                setToolTip("Zamestnanec skupiny A s ID:" + id);
                 break;
             case B:
                 setImage(AnimatorConfig.EMPLOYEEB);
+                setToolTip("Zamestnanec skupiny B s ID:" + id);
                 break;
             case C:
                 setImage(AnimatorConfig.EMPLOYEEC);
+                setToolTip("Zamestnanec skupiny C s ID:" + id);
                 break;
             default:
         }

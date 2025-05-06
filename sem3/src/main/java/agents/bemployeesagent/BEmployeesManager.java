@@ -61,12 +61,12 @@ public class BEmployeesManager extends OSPABA.Manager
 			msg.getOrderItem().setState(OrderItemState.WAITING_FOR_ASSEMBLY);
 			myAgent().addWaitingOrderAssemble(msg);
 		} else{
-			msg.setEmployee(myAgent().assignEmployee());
-			msg.getEmployee().getWorkloadStat().addSample(1d);
-			if (msg.getEmployee().getCurrentPosition() == Position.ASSEMBLY_STATION &&
-					msg.getEmployee().getStation() == msg.getAssemblyStation()) {
+			Employee employee = myAgent().assignEmployee();
+			msg.setEmployee(employee);
+			employee.getWorkloadStat().addSample(1d);
+			if (employee.getCurrentPosition() == Position.ASSEMBLY_STATION &&
+				employee.getStation() == msg.getAssemblyStation()) {
 					if (mySim().animatorExists()) {
-						Employee employee = msg.getEmployee();
 						Point2D target = new Point2D.Double(msg.getAssemblyStation().getPosition(mySim().currentTime()).getX() - 30,msg.getAssemblyStation().getPosition(mySim().currentTime()).getY());
 						Point2D[] path = new Point2D[] {
 							new Point2D.Double(employee.getPosition(mySim().currentTime()).getX(), employee.getPosition(mySim().currentTime()).getY()),       // výstup

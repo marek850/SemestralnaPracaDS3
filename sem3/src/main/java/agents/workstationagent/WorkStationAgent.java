@@ -79,7 +79,7 @@ public class WorkStationAgent extends OSPABA.Agent
 		if (mySimul.animatorExists()) {
 			totalWidth = (int)mySimul.getWorkStationNumber() * (sizeOfAssemblyStation + padding) - padding;
 			startX = mySimul.getStorage().getPosition(mySimul.currentTime()).getX() + (mySimul.getStorage().getWidth() - totalWidth) / 2; 
-			startY = mySimul.getStorage().getPosition(mySimul.currentTime()).getX() + mySimul.getStorage().getHeight() + 150;
+			startY = mySimul.getStorage().getPosition(mySimul.currentTime()).getY() + mySimul.getStorage().getHeight() + 150;
 		}
 		
 		for(int i = 0; i < mySimul.getWorkStationNumber(); i++)

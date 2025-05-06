@@ -4,12 +4,9 @@ import java.awt.geom.Point2D;
 
 import Entities.Employee;
 import Entities.States.EmployeeState;
-import Entities.States.OrderItemState;
-import Entities.States.Position;
 import OSPABA.*;
 import simulation.*;
 import agents.employeetransferagent.*;
-import OSPABA.Process;
 import OSPRNG.TriangularRNG;
 
 //meta! id="80"
@@ -19,7 +16,6 @@ public class WorkStationTransferProcess extends OSPABA.Process
 	public WorkStationTransferProcess(int id, Simulation mySim, CommonAgent myAgent)
 	{
 		super(id, mySim, myAgent);
-		MySimulation simulation = (MySimulation) mySim;
 		transferTimeGenerator = new TriangularRNG(120d, 150d, 500d/* , simulation.seedGenerator */);
 	}
 

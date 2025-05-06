@@ -2,7 +2,7 @@ package Generators;
 import java.util.List;
 import java.util.Random;
 
-import com.sem3.Constants.Constants;
+import Constants.Constants;
 
 
 

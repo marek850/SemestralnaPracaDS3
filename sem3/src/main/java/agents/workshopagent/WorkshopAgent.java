@@ -105,8 +105,7 @@ public class WorkshopAgent extends OSPABA.Agent
 	public WorkshopAgent(int id, Simulation mySim, Agent parent)
 	{
 		super(id, mySim, parent);
-		MySimulation sim = (MySimulation) mySim;
-		fitHardwareTime  = new UniformContinuousRNG(900d, 1500d, sim.seedGenerator);
+		fitHardwareTime  = new UniformContinuousRNG(900d, 1500d /* sim.seedGenerator */);
 		orderProcessingTimeStat = new Stat();
 		orderProcessGlobal = new Stat();
 		waitingOrders = new WStat(mySim);

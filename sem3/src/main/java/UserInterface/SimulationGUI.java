@@ -10,14 +10,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputFilter.Config;
-import java.nio.Buffer;
 import java.util.ArrayList;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
@@ -50,7 +44,6 @@ import agents.surroundingagent.SurroundingAgent;
 import agents.workshopagent.WorkshopAgent;
 import agents.workstationagent.WorkStationAgent;
 import simulation.Id;
-import simulation.Mc;
 import simulation.MySimulation;
 
 
@@ -81,6 +74,7 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
     private JTextField freeCLabelLabelTextField;
     private JTextField freeStationsLabelTextField;
     private JTextField waitingForVarnishLabelTextField;
+    private JTextField waitingFoCuttingLabelTextField;
     private JTextField waitingForAssembleLabelTextField;
     private JTextField waitingForFittingLabelTextField;
     private JTextField waitingForFittingCLabelTextField;
@@ -283,7 +277,7 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
         contentPanel.add(assemblyStationsScroll);
 
         
-        JPanel frontsPanel = new JPanel(new GridLayout(3, 6, 10, 10)); 
+        JPanel frontsPanel = new JPanel(new GridLayout(5, 4, 5, 10)); 
         animationPanel.add(frontsPanel, BorderLayout.NORTH);
 
        
@@ -291,65 +285,91 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
         waitingOrderLabelTextField = new JTextField(10);
         waitingOrderLabelTextField.setEditable(false);
 
-        frontsPanel.add(waitingOrderLabel);
-        frontsPanel.add(waitingOrderLabelTextField);
+        
 
         // Voľní pracovníci A
         JLabel freeALabel = new JLabel("Voľní pracovníci skupiny A:");
         freeALabelLabelTextField = new JTextField(10);
         freeALabelLabelTextField.setEditable(false);
-        frontsPanel.add(freeALabel);
-        frontsPanel.add(freeALabelLabelTextField);
+        
 
         // Voľní pracovníci B
         JLabel freeBLabel = new JLabel("Voľní pracovníci skupiny B:");
         freeBLabelLabelTextField = new JTextField(10);
         freeBLabelLabelTextField.setEditable(false);
-        frontsPanel.add(freeBLabel);
-        frontsPanel.add(freeBLabelLabelTextField);
+        
 
 
         // Voľní pracovníci C
         JLabel freeCLabel = new JLabel("Voľní pracovníci skupiny C:");
         freeCLabelLabelTextField = new JTextField(10);
         freeCLabelLabelTextField.setEditable(false);
-        frontsPanel.add(freeCLabel);
-        frontsPanel.add(freeCLabelLabelTextField);
+        
 
 
         // Voľné montážne miesta
         JLabel freeStationsLabel = new JLabel("Voľné montážne miesta:");
-        freeStationsLabelTextField = new JTextField(10);
+        freeStationsLabelTextField = new JTextField(5);
         freeStationsLabelTextField.setEditable(false);
-        frontsPanel.add(freeStationsLabel);
-        frontsPanel.add(freeStationsLabelTextField);
+        
 
 
         // Objednávky čakajúce na lakovanie
         JLabel waitingForVarnishLabel = new JLabel("Objednávky čakajúce na morenie a lakovanie:");
-        waitingForVarnishLabelTextField = new JTextField(10);
+        waitingForVarnishLabelTextField = new JTextField(5);
         waitingForVarnishLabelTextField.setEditable(false);
-        frontsPanel.add(waitingForVarnishLabel);
-        frontsPanel.add(waitingForVarnishLabelTextField);
+        
 
+        JLabel waitingForCuttingLabel = new JLabel("Objednávky čakajúce na rezanie:");
+        waitingFoCuttingLabelTextField = new JTextField(5);
+        waitingFoCuttingLabelTextField.setEditable(false);
+        
 
         // Objednávky čakajúce na skladanie
         JLabel waitingForAssembleLabel = new JLabel("Objednávky čakajúce na skladanie:");
-        waitingForAssembleLabelTextField = new JTextField(10);
+        waitingForAssembleLabelTextField = new JTextField(5);
         waitingForAssembleLabelTextField.setEditable(false);
-        frontsPanel.add(waitingForAssembleLabel);
-        frontsPanel.add(waitingForAssembleLabelTextField);
+        
 
         // Objednávky čakajúce na montáž kovania
         JLabel waitingForFittingLabel = new JLabel("Objednávky čakajúce na montáž kovani A:");
-        waitingForFittingLabelTextField = new JTextField(10);
+        waitingForFittingLabelTextField = new JTextField(5);
         waitingForFittingLabelTextField.setEditable(false);
+        
+
+        JLabel waitingForFittingLabelC = new JLabel("Objednávky čakajúce na montáž kovani C:");
+        waitingForFittingCLabelTextField = new JTextField(5);
+        waitingForFittingCLabelTextField.setEditable(false);
+        
+
+        frontsPanel.add(freeALabel);
+        frontsPanel.add(freeALabelLabelTextField);
+
+        frontsPanel.add(waitingForCuttingLabel);
+        frontsPanel.add(waitingFoCuttingLabelTextField);
+        
+
+        frontsPanel.add(freeBLabel);
+        frontsPanel.add(freeBLabelLabelTextField);
+
+        frontsPanel.add(waitingForVarnishLabel);
+        frontsPanel.add(waitingForVarnishLabelTextField);
+
+        frontsPanel.add(freeCLabel);
+        frontsPanel.add(freeCLabelLabelTextField);
+
+        frontsPanel.add(waitingForAssembleLabel);
+        frontsPanel.add(waitingForAssembleLabelTextField);
+
+        frontsPanel.add(freeStationsLabel);
+        frontsPanel.add(freeStationsLabelTextField);
+
         frontsPanel.add(waitingForFittingLabel);
         frontsPanel.add(waitingForFittingLabelTextField);
 
-        JLabel waitingForFittingLabelC = new JLabel("Objednávky čakajúce na montáž kovani C:");
-        waitingForFittingCLabelTextField = new JTextField(10);
-        waitingForFittingCLabelTextField.setEditable(false);
+        frontsPanel.add(waitingOrderLabel);
+        frontsPanel.add(waitingOrderLabelTextField);
+
         frontsPanel.add(waitingForFittingLabelC);
         frontsPanel.add(waitingForFittingCLabelTextField);
 
@@ -427,9 +447,9 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
             animPanel = simulation.animator();
             animationJPanel.add(animPanel.canvas());
             animPanel.canvas().setBackground(Color.lightGray);
-            checkBox.setEnabled(false);
+            
         }
-        
+        checkBox.setEnabled(false);
         
         //animPanel.canvas().setBounds(0, 0, 1600, 800); 
         
@@ -608,6 +628,7 @@ public class SimulationGUI extends JFrame implements ISimDelegate {
             freeCLabelLabelTextField.setText(String.valueOf(cEmployeesAgent.getFreeEmployees().size()));
             freeStationsLabelTextField.setText(String.valueOf(workStationAgent.getFreeAssemblyStations().size()));
             waitingForVarnishLabelTextField.setText(String.valueOf(cEmployeesAgent.getWaitingOrdersVarnish().size()));
+            waitingFoCuttingLabelTextField.setText(String.valueOf(aEmployeesAgent.getWaitingOrdersCutting().size()));
             waitingForAssembleLabelTextField.setText(String.valueOf(bEmployeesAgent.getWaitingOrdersAssemble().size()));
             waitingForFittingLabelTextField.setText(String.valueOf(aEmployeesAgent.getWaitingOrdersHardwareFit().size()));
             waitingForFittingCLabelTextField.setText(String.valueOf(cEmployeesAgent.getWaitingOrdersHardwareFit().size()));

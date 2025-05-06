@@ -1,7 +1,5 @@
 package simulation;
 
-import OSPABA.*;
-
 public class Id extends OSPABA.IdList
 {
 	//meta! userInfo="Generated code: do not modify", tag="begin"

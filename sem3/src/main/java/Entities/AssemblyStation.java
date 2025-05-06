@@ -15,6 +15,7 @@ public class AssemblyStation extends AnimImageItem implements Comparable<Assembl
         this.id = id;
         this.currentProcess = Process.NONE;
         this.startPositionOfQueue = new Point2D.Double(0, 0);
+        setToolTip("Montazne miesto s ID:" + id);
     }
     public int getId() {
         return id;

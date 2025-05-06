@@ -51,7 +51,6 @@ public class SurroundingAgent extends OSPABA.Agent
 	public SurroundingAgent(int id, Simulation mySim, Agent parent)
 	{
 		super(id, mySim, parent);
-		MySimulation sim = (MySimulation) mySim;
 		itemNumberGen = new UniformDiscreteRNG(1, 5/* , sim.seedGenerator */);
 		itemTypeGen = new UniformDiscreteRNG(0, 100/* ,sim.seedGenerator */);
 		stainProbGen = new UniformDiscreteRNG(0, 100/* ,sim.seedGenerator */);

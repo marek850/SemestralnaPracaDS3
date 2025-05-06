@@ -5,7 +5,6 @@ import Entities.States.OrderItemState;
 import OSPABA.*;
 import simulation.*;
 import agents.aemployeesagent.*;
-import OSPABA.Process;
 import OSPRNG.TriangularRNG;
 import UserInterface.AnimatorConfig;
 
@@ -16,7 +15,6 @@ public class MaterialPrepareProcess extends OSPABA.Process
 	public MaterialPrepareProcess(int id, Simulation mySim, CommonAgent myAgent)
 	{
 		super(id, mySim, myAgent);
-		MySimulation simulation = (MySimulation) mySim;
 		prepareTimeGenerator = new TriangularRNG(300d, 500d, 900d/* , simulation.seedGenerator */);
 	}
 
@@ -24,7 +22,6 @@ public class MaterialPrepareProcess extends OSPABA.Process
 	public void prepareReplication()
 	{
 		super.prepareReplication();
-		
 	}
 
 	//meta! sender="AEmployeesAgent", id="182", type="Start"

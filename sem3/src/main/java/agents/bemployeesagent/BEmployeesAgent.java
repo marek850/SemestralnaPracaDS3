@@ -86,8 +86,10 @@ public class BEmployeesAgent extends OSPABA.Agent
 			freeEmployees.add(employee);
 			if (mySim().animatorExists()) {
                 mySim().animator().register(employee);
+				
 				int x = (int)(startX + index * (employeeSize + padding));
 				int y = (int)(startY + 1 * (employeeSize + rowPadding));
+				
                 employee.setPosition(new Point(x, y));
 				employee.setDefaultStoragePosX(x);
 				employee.setDefaultStoragePosY(y);

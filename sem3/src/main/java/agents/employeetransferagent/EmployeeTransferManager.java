@@ -1,7 +1,5 @@
 package agents.employeetransferagent;
 
-import org.apache.commons.math3.geometry.partitioning.BSPTreeVisitor.Order;
-
 import Entities.States.OrderItemState;
 import Entities.States.Position;
 import OSPABA.*;
@@ -33,9 +31,7 @@ public class EmployeeTransferManager extends OSPABA.Manager
 	{
 		MyMessage msg = (MyMessage) message.createCopy();
 		OrderItemState state = msg.getOrderItem().getState();
-		if(msg.getOrderItem().getId() == 1062081874){
-			System.out.println("x");
-		}
+		
 		if (state == OrderItemState.PENDING || state == OrderItemState.MATERIAL_PREPARED) {
 			msg.setAddressee(myAgent().findAssistant(Id.wareHouseTransferProcess));
 			startContinualAssistant(msg);

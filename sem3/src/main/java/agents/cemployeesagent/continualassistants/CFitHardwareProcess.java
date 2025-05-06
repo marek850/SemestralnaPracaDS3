@@ -6,7 +6,6 @@ import OSPABA.*;
 import simulation.*;
 import agents.cemployeesagent.*;
 import Entities.States.Process;
-import OSPRNG.UniformContinuousRNG;
 
 //meta! id="171"
 public class CFitHardwareProcess extends OSPABA.Process

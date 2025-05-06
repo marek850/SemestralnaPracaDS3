@@ -1,5 +1,6 @@
 package agents.aemployeesagent.continualassistants;
 
+import Entities.OrderItem;
 import Entities.States.EmployeeState;
 import Entities.States.OrderItemState;
 import OSPABA.*;
@@ -8,7 +9,6 @@ import agents.aemployeesagent.*;
 import Entities.States.Process;
 import OSPRNG.EmpiricPair;
 import OSPRNG.EmpiricRNG;
-import OSPRNG.RNG;
 import OSPRNG.UniformContinuousRNG;
 
 //meta! id="161"
@@ -20,13 +20,12 @@ public class CutProcess extends OSPABA.Process
 	public CutProcess(int id, Simulation mySim, CommonAgent myAgent)
 	{
 		super(id, mySim, myAgent);
-		MySimulation simulation = (MySimulation) mySim;
 		tableCutTime = new EmpiricRNG(/* simulation.seedGenerator, */
 		new EmpiricPair(new UniformContinuousRNG(600d, 1500d), 0.6),
 		new EmpiricPair(new UniformContinuousRNG(1500d, 3000d), 0.4)
 		);
-	chairCutTime = new UniformContinuousRNG(720d, 960d/* ,simulation.seedGenerator */);
-	wardrobeCutTime = new UniformContinuousRNG(900d, 4800d/* ,simulation.seedGenerator */);
+		chairCutTime = new UniformContinuousRNG(720d, 960d/* ,simulation.seedGenerator */);
+		wardrobeCutTime = new UniformContinuousRNG(900d, 4800d/* ,simulation.seedGenerator */);
 	}
 
 	@Override
@@ -42,9 +41,10 @@ public class CutProcess extends OSPABA.Process
 		MyMessage myMessage = (MyMessage) message.createCopy();
 		myMessage.getEmployee().setState(EmployeeState.CUTTING);
 		myMessage.getAssemblyStation().setCurrentProcess(Process.CUTTING);
-		myMessage.getOrderItem().setState(OrderItemState.BEING_CUT);
+		OrderItem orderItem = myMessage.getOrderItem();
+		orderItem.setState(OrderItemState.BEING_CUT);
 		myMessage.setCode(Mc.cutOrderItem);
-		switch (myMessage.getOrderItem().getItemType()) {
+		switch (orderItem.getItemType()) {
 			case CHAIR:
 				hold(chairCutTime.sample(), myMessage);
 				break;

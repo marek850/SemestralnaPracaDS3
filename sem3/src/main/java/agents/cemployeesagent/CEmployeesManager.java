@@ -70,19 +70,16 @@ public class CEmployeesManager extends OSPABA.Manager
 	public void processVarnishOrderitem(MessageForm message)
 	{
 		MyMessage msg = (MyMessage)message.createCopy();
-		if(msg.getOrderItem().getId() == 1062081874){
-			System.out.println("x");
-		}
 		if (myAgent().getFreeEmployees().isEmpty()) {
 			msg.getOrderItem().setState(OrderItemState.WAITING_FOR_VARNISH);
 			myAgent().addWaitingOrderVarnish(msg);
 		} else{
-			msg.setEmployee(myAgent().assignEmployee());
-			msg.getEmployee().getWorkloadStat().addSample(1d);
-			if (msg.getEmployee().getCurrentPosition() == Position.ASSEMBLY_STATION &&
-					msg.getEmployee().getStation() == msg.getAssemblyStation()) {
+			Employee employee = myAgent().assignEmployee();
+			msg.setEmployee(employee);
+			employee.getWorkloadStat().addSample(1d);
+			if (employee.getCurrentPosition() == Position.ASSEMBLY_STATION &&
+				employee.getStation() == msg.getAssemblyStation()) {
 					if (mySim().animatorExists()) {
-						Employee employee = msg.getEmployee();
 						Point2D target = new Point2D.Double(msg.getAssemblyStation().getPosition(mySim().currentTime()).getX() - 30,msg.getAssemblyStation().getPosition(mySim().currentTime()).getY());
 						Point2D[] path = new Point2D[] {
 							new Point2D.Double(employee.getPosition(mySim().currentTime()).getX(), employee.getPosition(mySim().currentTime()).getY()),       // výstup
@@ -111,13 +108,13 @@ public class CEmployeesManager extends OSPABA.Manager
 			myAgent().addWaitingOrderFitting(msg);
 		} else{
 			//ak je volny zamestnanec tak skontrolujem ci ho treba presunut
-			msg.setEmployee(myAgent().assignEmployee());
-			msg.getEmployee().getWorkloadStat().addSample(1d);
-			if(msg.getEmployee().getCurrentPosition() == Position.ASSEMBLY_STATION && msg.getEmployee().getStation() == msg.getAssemblyStation()) {
+			Employee employee = myAgent().assignEmployee();
+			msg.setEmployee(employee);
+			employee.getWorkloadStat().addSample(1d);
+			if(employee.getCurrentPosition() == Position.ASSEMBLY_STATION && employee.getStation() == msg.getAssemblyStation()) {
 				//ak je uz na montaznom mieste tak zacne s montazou
 				msg.setCode(Mc.cFitHardwareOnItem);
 				if (mySim().animatorExists()) {
-					Employee employee = msg.getEmployee();
 					Point2D target = new Point2D.Double(msg.getAssemblyStation().getPosition(mySim().currentTime()).getX() - 30,msg.getAssemblyStation().getPosition(mySim().currentTime()).getY());
 					Point2D[] path = new Point2D[] {
 						new Point2D.Double(employee.getPosition(mySim().currentTime()).getX(), employee.getPosition(mySim().currentTime()).getY()),       // výstup
@@ -149,9 +146,7 @@ public class CEmployeesManager extends OSPABA.Manager
 		} else{
 			Employee finishedEmployee = msg.getEmployee();
 			handleFinishedEmployee(finishedEmployee);
-			if(msg.getOrderItem().getItemType() == FurnitureType.WARDROBE) {
-				System.out.println("");
-			}
+			
 			msg.setEmployee(null);
 			msg.setCode(Mc.varnishOrderitem);
 			response(msg);
@@ -165,9 +160,6 @@ public class CEmployeesManager extends OSPABA.Manager
 		msg.getAssemblyStation().setCurrentProcess(Process.NONE);
 		Employee finishedEmployee = msg.getEmployee();
 		handleFinishedEmployee(finishedEmployee);
-		if(msg.getOrderItem().getItemType() == FurnitureType.WARDROBE) {
-			System.out.println("");
-		}
 		msg.setEmployee(null);
 		msg.setCode(Mc.varnishOrderitem);
 		response(msg);

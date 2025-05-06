@@ -1,15 +1,10 @@
 package agents.surroundingagent;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import Entities.States.OrderState;
 
 import Entities.Order;
 import Entities.OrderItem;
 import Entities.States.FurnitureType;
-import Generators.DiscreteGenerator;
 import OSPABA.*;
 import simulation.*;
 

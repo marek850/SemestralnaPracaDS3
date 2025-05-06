@@ -1,10 +1,7 @@
 package UserInterface;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInputFilter.Config;
-
 import javax.imageio.ImageIO;
 
 public class AnimatorConfig {
@@ -17,6 +14,7 @@ public class AnimatorConfig {
     public static final BufferedImage TABLE;
     public static final BufferedImage WARDROBE;
     public static final BufferedImage EMPLOYEE_WOOD;
+    public static final BufferedImage STORAGE;
 
     static {
         try {
@@ -29,7 +27,7 @@ public class AnimatorConfig {
             CHAIR = ImageIO.read(AnimatorConfig.class.getClassLoader().getResourceAsStream("chair.png"));
             TABLE = ImageIO.read(AnimatorConfig.class.getClassLoader().getResourceAsStream("table.png"));
             WARDROBE = ImageIO.read(AnimatorConfig.class.getClassLoader().getResourceAsStream("wardrobe.png"));
-
+            STORAGE = ImageIO.read(AnimatorConfig.class.getClassLoader().getResourceAsStream("storage.png"));
 
         } catch (IOException e) {
             throw new RuntimeException("Nenacitalo obrazky pre animator.", e);

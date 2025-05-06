@@ -3,7 +3,7 @@ package Generators;
 import java.util.List;
 import java.util.Random;
 
-import com.sem3.Constants.Constants;
+import Constants.Constants;
 
 public class ContinuousGenerator extends AbstractGenerator<Double> {
     private final List<double[]> intervals;

@@ -72,9 +72,10 @@ public class AEmployeesManager extends OSPABA.Manager
 			myAgent().addWaitingOrderFitting(msg);
 		} else{
 			//ak je volny zamestnanec tak skontrolujem ci ho treba presunut
-			msg.setEmployee(myAgent().assignEmployee());
-			msg.getEmployee().getWorkloadStat().addSample(1d);
-			if(msg.getEmployee().getCurrentPosition() == Position.ASSEMBLY_STATION && msg.getEmployee().getStation() == msg.getAssemblyStation()) {
+			Employee employee = myAgent().assignEmployee();
+			msg.setEmployee(employee);
+			employee.getWorkloadStat().addSample(1d);
+			if(employee.getCurrentPosition() == Position.ASSEMBLY_STATION && employee.getStation() == msg.getAssemblyStation()) {
 				//ak je uz na montaznom mieste tak zacne s montazou
 				msg.setCode(Mc.aFitHardwareOnItem);
 				msg.setAddressee(myAgent().findAssistant(Id.aFitHardwareProcess));
@@ -128,9 +129,10 @@ public class AEmployeesManager extends OSPABA.Manager
 				workshopAgent.removeUnstartedOrder(msg.getOrderItem().getOrder());
 			}
 			//ak je volny zamestnanec tak skontrolujem ci ho treba presunut
-			msg.setEmployee(myAgent().assignEmployee());
-			msg.getEmployee().getWorkloadStat().addSample(1d);
-			if(msg.getEmployee().getCurrentPosition() == Position.STORAGE) {
+			Employee employee = myAgent().assignEmployee();
+			msg.setEmployee(employee);
+			employee.getWorkloadStat().addSample(1d);
+			if(employee.getCurrentPosition() == Position.STORAGE) {
 				//ak je uz v sklade nemusim presuvat a zacne s pripravou materialu
 				//msg.setCode(Mc.preparingMaterial);
 				msg.setAddressee(myAgent().findAssistant(Id.materialPrepareProcess));
@@ -151,9 +153,10 @@ public class AEmployeesManager extends OSPABA.Manager
 	{
 		MyMessage msg = (MyMessage) message.createCopy();
 		Employee finishedEmployee = msg.getEmployee();
-		msg.getAssemblyStation().setCurrentProcess(Process.NONE);
+		AssemblyStation station = msg.getAssemblyStation();
+		station.setCurrentProcess(Process.NONE);
 		handleFinishedEmployee(finishedEmployee);
-		msg.getAssemblyStation().setImage(AnimatorConfig.ASSEMBLY_STATION);
+		station.setImage(AnimatorConfig.ASSEMBLY_STATION);
 		msg.setEmployee(null);
 		msg.setCode(Mc.aFitHardwareOnItem);
 		response(msg);

@@ -5,8 +5,10 @@ import java.util.Random;
 
 import Entities.Employee;
 import OSPABA.*;
+import OSPAnimator.AnimImageItem;
 import OSPAnimator.AnimShape;
 import OSPAnimator.AnimShapeItem;
+import UserInterface.AnimatorConfig;
 import agents.bemployeesagent.*;
 import agents.modelagent.*;
 import agents.surroundingagent.*;
@@ -62,19 +64,16 @@ public class MySimulation extends OSPABA.Simulation
 		
 			storage = new AnimShapeItem(AnimShape.RECTANGLE, width, height);
 			storage.setZIndex(0);
-			storage.setColor(Color.GRAY);
-			storage.setPosition(100, 100); 
+			storage.setColor(new Color(102, 51, 0));
+			storage.setPosition(500d, 150d); 
 			storage.setFill(true);
-		
-		
-		
+			storage.setToolTip("Sklad");
 	}
 
 	@Override
 	public void prepareSimulation()
 	{
 		super.prepareSimulation();
-		System.out.println(seed);
 		// Create global statistcis
 	}
 
@@ -89,13 +88,14 @@ public class MySimulation extends OSPABA.Simulation
 			int width = Math.max(aEmployeesAgent.getEmployees().size(), Math.max(bEmployeesAgent.getEmployees().size(), cEmployeesAgent.getEmployees().size())) * 42; 
 			int height = (36 + 10) * 3 + 20;
 
-			storage = new AnimShapeItem(AnimShape.RECTANGLE, width, height);
+			//storage = new AnimShapeItem(AnimShape.RECTANGLE, width, height);
 			if (animatorExists()) {
 			animator().register(storage);
 			storage.setZIndex(0);
-			storage.setColor(Color.GRAY);
-			storage.setPosition(100, 100); 
+			/* storage.setColor(new Color(102, 51, 0));
+			storage.setPosition(animator(), 100); 
 			storage.setFill(true);
+			storage.setToolTip("Sklad"); */
 			}
 			
 

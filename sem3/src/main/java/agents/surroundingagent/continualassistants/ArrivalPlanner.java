@@ -3,9 +3,6 @@ package agents.surroundingagent.continualassistants;
 import OSPABA.*;
 import OSPRNG.ExponentialRNG;
 
-import com.sem3.Generators.ExponentialGenerator;
-
-import Entities.Order;
 import agents.surroundingagent.*;
 import simulation.*;
 
@@ -16,7 +13,6 @@ public class ArrivalPlanner extends OSPABA.Scheduler
 	public ArrivalPlanner(int id, Simulation mySim, CommonAgent myAgent)
 	{
 		super(id, mySim, myAgent);
-		MySimulation simulation = (MySimulation) mySim;
 		arrivalTimeGenerator = new ExponentialRNG(1800d/* , simulation.seedGenerator */);
 	}
 

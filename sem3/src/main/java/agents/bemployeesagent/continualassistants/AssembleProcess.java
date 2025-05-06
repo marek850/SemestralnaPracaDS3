@@ -1,5 +1,6 @@
 package agents.bemployeesagent.continualassistants;
 
+import Entities.OrderItem;
 import Entities.States.EmployeeState;
 import Entities.States.OrderItemState;
 import Entities.States.Process;
@@ -17,7 +18,6 @@ public class AssembleProcess extends OSPABA.Process
 	public AssembleProcess(int id, Simulation mySim, CommonAgent myAgent)
 	{
 		super(id, mySim, myAgent);
-		MySimulation simulation = (MySimulation) mySim;
 		tableAssembleTime = new UniformContinuousRNG(1800d, 3600d/* , simulation.seedGenerator */);
 		chairAssembleTime = new UniformContinuousRNG(840d, 1440d/* ,simulation.seedGenerator */);
 		wardronbeAssembleTime = new UniformContinuousRNG(2100d, 4500d/* ,simulation.seedGenerator */);
@@ -36,9 +36,10 @@ public class AssembleProcess extends OSPABA.Process
 		MyMessage myMessage = (MyMessage) message.createCopy();
 		myMessage.getEmployee().setState(EmployeeState.ASSEMBLING);
 		myMessage.getAssemblyStation().setCurrentProcess(Process.ASSEMBLING);
-		myMessage.getOrderItem().setState(OrderItemState.BEING_ASSEMBLED);
+		OrderItem orderItem = myMessage.getOrderItem();
+		orderItem.setState(OrderItemState.BEING_ASSEMBLED);
 		myMessage.setCode(Mc.assembleOrderItem);
-		switch (myMessage.getOrderItem().getItemType()) {
+		switch (orderItem.getItemType()) {
 			case CHAIR:
 				hold(chairAssembleTime.sample(), myMessage);
 				break;

@@ -1,7 +1,5 @@
 package agents.modelagent;
 
-import Entities.Order;
-import Entities.OrderItem;
 import OSPABA.*;
 import simulation.*;
 

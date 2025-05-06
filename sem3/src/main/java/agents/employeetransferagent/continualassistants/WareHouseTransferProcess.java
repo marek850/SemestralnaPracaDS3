@@ -9,7 +9,6 @@ import Entities.States.Position;
 import OSPABA.*;
 import simulation.*;
 import agents.employeetransferagent.*;
-import OSPABA.Process;
 import OSPRNG.TriangularRNG;
 
 //meta! id="82"
@@ -19,7 +18,6 @@ public class WareHouseTransferProcess extends OSPABA.Process
 	public WareHouseTransferProcess(int id, Simulation mySim, CommonAgent myAgent)
 	{
 		super(id, mySim, myAgent);
-		MySimulation simulation = (MySimulation) mySim;
 		transferTimeGenerator = new TriangularRNG(60d, 120d, 480d/* , simulation.seedGenerator */);
 	}
 
